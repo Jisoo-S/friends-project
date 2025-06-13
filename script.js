@@ -167,6 +167,7 @@ function changePage(offset) {
   currentPage += offset;
   renderStamps();
   updateButtons();
+  
 }
 
 function updateButtons() {
