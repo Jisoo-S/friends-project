@@ -87,7 +87,7 @@ h1 {
 }
 
 .star {
-  font-size: 80px;
+  font-size: min(14vw, 80px);
   color: #ccc;
   cursor: pointer;
   transition: color 0.3s ease;
@@ -95,6 +95,27 @@ h1 {
 
 .star.filled {
   color: gold;
+}
+
+/* ✅ 모바일 화면에 맞춘 스타일 */
+@media (max-width: 600px) {
+  .star {
+    font-size: 50px; /* 별 크기 줄이기 */
+  }
+
+  .stamp-page {
+    grid-template-columns: repeat(3, 1fr); /* 한 줄에 별 3개 */
+    grid-gap: 15px;
+  }
+
+  .modal-content {
+    width: 90%;
+  }
+
+  #stamp-screen {
+    width: 95%;
+    padding: 20px;
+  }
 }
 
 .date-label {
