@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nice to Meet You!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Spicy+Rice&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 홈 화면 -->
+  <div id="home-screen" class="screen">
+    <h1>nice to meet you!</h1>
+    <div id="folder-list" class="folder-list"></div>
+    <button id="add-friend">add friend</button>
+    
+  </div>
+
+  <!-- 스탬프 화면 -->
+  <div id="stamp-screen" class="screen" style="display: none;">
+    <div class="top-bar">
+      <button id="back-button">&larr; home</button>
+    </div>
+    <h1 id="friend-title" class="center-title"></h1>
+    <div class="pagination-buttons">
+      <button id="prevPage" onclick="changePage(-1)" hidden>&lt;</button>
+      <button id="nextPage" onclick="changePage(1)" hidden>&gt;</button>
+    </div>
+    <div id="stamp-pages"></div>
+  </div>
+
+  <!-- 모달 -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span id="modal-close" class="modal-close">&times;</span>
+      <h2 id="modal-title">name</h2>
+      <input type="text" id="modal-input" placeholder="name" />
+      <button id="modal-confirm">OK</button>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button id="prevPage" onclick="changePage(-1)">&lt;</button>
+    <button id="nextPage" onclick="changePage(1)">&gt;</button>
+  </div>
+
+
+  <footer>
+  © 2025. Jisoo Shin All rights reserved.
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

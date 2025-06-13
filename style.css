@@ -1,0 +1,175 @@
+body {
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+  background: #7b5518; /* 전체 배경은 갈색 */
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.screen {
+  padding: 40px;
+}
+
+h1 {
+  font-size: 48px;
+  color: #2271b1;
+  margin: 20px;
+}
+
+.folder-list {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.folder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.folder img {
+  width: 80px;
+}
+
+.folder span {
+  margin-top: 8px;
+  font-size: 20px;
+  color: black;
+}
+
+/* ADD FRIEND 버튼 */
+#add-friend {
+  margin-top: 40px;
+  font-size: 24px;
+  background: white;
+  color: pink;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 2px 2px 5px gray;
+}
+
+
+/* 처음 홈 화면만 하늘색 배경 */
+#home-screen {
+  background: #cdefff;
+  min-height: 100vh;
+  padding: 40px;
+}
+
+/* 스탬프 화면은 흰색 카드 */
+#stamp-screen {
+  background: white;
+  border-radius: 30px;
+  margin: 40px auto;
+  padding: 30px;
+  width: 80%;
+  max-width: 800px;
+}
+
+.center-title {
+  font-size: 42px;
+  color: #444;
+  margin: 20px 0;
+}
+
+.stamp-page {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 25px;
+  justify-items: center;
+  margin: 30px 0;
+}
+
+.star {
+  font-size: 80px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.star.filled {
+  color: gold;
+}
+
+.date-label {
+  font-size: 16px;
+  margin-top: 4px;
+  color: #555;
+}
+
+button {
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+}
+
+/* 모달 스타일 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 10px gray;
+  text-align: center;
+  min-width: 300px;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+  color: #2271b1;
+}
+
+.modal-content input {
+  font-size: 18px;
+  padding: 8px;
+  width: 80%;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.modal-content button {
+  font-size: 18px;
+  padding: 8px 20px;
+  background: #ffccdd;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.modal-close {
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+footer {
+  margin-top: 40px;
+  padding: 20px;
+  font-size: 14px;
+  color: #999;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive;
+}
