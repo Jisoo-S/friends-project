@@ -12,14 +12,17 @@
   <div id="home-screen" class="screen">
     <h1>nice to meet you!</h1>
     <div id="folder-list" class="folder-list"></div>
-    <button id="add-friend">add friend</button>
-    
+    <div style="margin-top:80px; display:flex; justify-content:center; align-items:center;">
+      <button id="add-friend" class="action-btn">add friend</button>
+      <button id="delete-friend" class="action-btn">delete friend</button>
+    </div>
   </div>
 
   <!-- 스탬프 화면 -->
   <div id="stamp-screen" class="screen" style="display: none;">
-    <div class="top-bar">
+    <div class="top-bar" style="display: flex; justify-content: space-between; align-items: center;">
       <button id="back-button">&larr; home</button>
+      <button id="edit-friend" style="font-size:18px; background:#ffccdd; border:none; border-radius:8px; padding:6px 16px; cursor:pointer;">edit</button>
     </div>
     <h1 id="friend-title" class="center-title"></h1>
     <div class="pagination-buttons">

@@ -66,6 +66,8 @@ function renderFolders() {
   for (const name in friends) {
     const folder = document.createElement('div');
     folder.className = 'folder';
+    folder.style.position = 'relative';
+
     folder.onclick = () => openStampPage(name);
 
     const icon = document.createElement('img');
@@ -183,4 +185,59 @@ function updateButtons() {
 backButton.onclick = () => {
   stampScreen.style.display = 'none';
   homeScreen.style.display = 'block';
+};
+
+// delete 버튼 기능 추가
+const deleteFriendBtn = document.getElementById('delete-friend');
+deleteFriendBtn.onclick = () => {
+  // 삭제할 친구 선택 모달
+  const friendNames = Object.keys(friends);
+  if (friendNames.length === 0) {
+    // 안내 모달
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal';
+    modalDiv.style.display = 'flex';
+    modalDiv.style.alignItems = 'center';
+    modalDiv.style.justifyContent = 'center';
+    modalDiv.style.zIndex = '2000';
+    modalDiv.innerHTML = `
+      <div class=\"modal-content\" style=\"display:flex;flex-direction:column;align-items:center;\">\n        <span class=\"modal-close\" style=\"position:absolute;right:20px;top:10px;font-size:24px;cursor:pointer;\">&times;</span>\n        <h2 style=\"margin-bottom:24px;\">There is no file to delete.</h2>\n      </div>\n    `;
+    document.body.appendChild(modalDiv);
+    modalDiv.querySelector('.modal-close').onclick = () => document.body.removeChild(modalDiv);
+    return;
+  }
+  // 커스텀 모달 생성
+  const modalDiv = document.createElement('div');
+  modalDiv.className = 'modal';
+  modalDiv.style.display = 'flex';
+  modalDiv.style.alignItems = 'center';
+  modalDiv.style.justifyContent = 'center';
+  modalDiv.style.zIndex = '2000';
+  modalDiv.innerHTML = `
+    <div class=\"modal-content\" style=\"display:flex;flex-direction:column;align-items:center;\">\n      <span class=\"modal-close\" style=\"position:absolute;right:20px;top:10px;font-size:24px;cursor:pointer;\">&times;</span>\n      <h2 style=\"margin-bottom:24px;\">Which file do you want to delete?</h2>\n      <select id=\"delete-select\" style=\"font-size:18px;padding:8px;width:80%;margin-bottom:32px;border-radius:8px;border:1px solid #ccc;\">\n        ${friendNames.map(n => `<option value=\"${n}\">${n}</option>`).join('')}\n      </select>\n      <button id=\"delete-confirm\" style=\"font-size:18px;padding:12px 40px;background:#ffccdd;color:black;border:none;border-radius:12px;cursor:pointer;font-family:'Spicy Rice','Gowun Dodum',cursive,sans-serif;margin-top:12px;\">OK</button>\n    </div>\n  `;
+  document.body.appendChild(modalDiv);
+  // 닫기
+  modalDiv.querySelector('.modal-close').onclick = () => document.body.removeChild(modalDiv);
+  // 삭제
+  modalDiv.querySelector('#delete-confirm').onclick = () => {
+    const sel = modalDiv.querySelector('#delete-select').value;
+    delete friends[sel];
+    renderFolders();
+    document.body.removeChild(modalDiv);
+  };
+};
+
+// edit 버튼 기능 수정(중복 체크 제거)
+const editFriendBtn = document.getElementById('edit-friend');
+editFriendBtn.onclick = () => {
+  if (!currentFriend) return;
+  showModal("Edit friend's name", currentFriend, (newName) => {
+    if (newName && newName !== currentFriend) {
+      friends[newName] = friends[currentFriend];
+      delete friends[currentFriend];
+      currentFriend = newName;
+      friendTitle.textContent = newName;
+      renderFolders();
+    }
+  });
 };
