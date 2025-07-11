@@ -6,10 +6,65 @@
   <title>Nice to Meet You!</title>
   <link href="https://fonts.googleapis.com/css2?family=Spicy+Rice&family=Gowun+Dodum&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+    import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // Firebase 설정 (여기에 본인의 Firebase 설정을 넣어주세요)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBXCbQ00Gruy6IL9LiWe7n148P6OU7WCyM",
+      authDomain: "friends-fad33.firebaseapp.com",
+      projectId: "friends-fad33",
+      storageBucket: "friends-fad33.appspot.com",
+      messagingSenderId: "839126031945",
+      appId: "friends-fad33"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // 전역에서 사용할 수 있도록 설정
+    window.auth = auth;
+    window.db = db;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.signOut = signOut;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.doc = doc;
+    window.setDoc = setDoc;
+    window.getDoc = getDoc;
+  </script>
 </head>
 <body>
+  <!-- 로그인 화면 -->
+  <div id="login-screen" class="screen">
+    <div class="login-container">
+      <h1>friends</h1>
+      <input type="email" id="username" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="login-btn" class="login-btn" style="width: 70%;">Login</button>
+      <button id="signup-btn" class="signup-btn" style="width: 70%;">Sign Up</button>
+      
+      <div class="login-info">
+        처음 로그인 하는 경우에는 id와 password를 적고<br>회원가입 버튼을 누른 뒤에 로그인 해주세요!
+      </div>
+      <div class="password-note">
+        *password는 6자리 이상이어야합니다.
+      </div>
+      
+      <div id="error-message" class="error-message"></div>
+      <div id="loading" class="loading">처리 중...</div>
+    </div>
+  </div>
+
   <!-- 홈 화면 -->
-  <div id="home-screen" class="screen">
+  <div id="home-screen" class="screen" style="display: none;">
+    <button class="logout-btn" id="logout-btn" onclick="handleLogout()">Logout</button>
     <h1>nice to meet you!</h1>
     <div id="folder-list" class="folder-list"></div>
     <div style="margin-top:80px; display:flex; justify-content:center; align-items:center;">
@@ -31,8 +86,8 @@
     </div>
 
     <div class="nav-buttons">
-      <button id="prevPage" onclick="changePage(-1)">&lt;</button>
-      <button id="nextPage" onclick="changePage(1)">&gt;</button>
+      <button id="prevPage" onclick="changePage(-1)">←</button>
+      <button id="nextPage" onclick="changePage(1)">→</button>
     </div>
     <div id="stamp-pages"></div>
   </div>
@@ -47,11 +102,8 @@
     </div>
   </div>
 
-
-
-
   <footer>
-  © 2025. Jisoo Shin All rights reserved.
+    © 2025. Jisoo Shin All rights reserved.
   </footer>
 
   <script src="script.js"></script>
