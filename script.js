@@ -642,10 +642,16 @@ function renderFolders() {
 // 폴더 클릭 → 스탬프 페이지
 function openStampPage(name) {
   currentFriend = name;
-  currentPage = 0;
+  
+  // 스탬프 개수에 따라 마지막 페이지로 이동 (새로 추가된 부분)
+  const stamps = friends[name] || [];
+  const totalStamps = stamps.length;
+  const lastPageWithStamp = Math.max(0, Math.floor((totalStamps - 1) / maxStarsPerPage));
+  currentPage = totalStamps > 0 ? lastPageWithStamp : 0;
+  
   homeScreen.style.display = 'none';
-  stampScreen.style.display = 'block';
-  friendTitle.textContent = name;
+  stampScreen.style.display = 'block'; 
+  friendTitle.textContent = name; 
   
   // 버튼 강제로 보이게 만들기
   setTimeout(() => {
