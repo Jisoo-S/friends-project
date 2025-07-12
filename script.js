@@ -167,7 +167,7 @@ function showModal(title, defaultValue, callback, isDateModal = false, hasExisti
     // 날짜 검증
     if (isDateModal && inputValue) {
       if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(inputValue)) {
-        showAlertModal('날짜를 YYYY-MM-DD 형식으로 입력해주세요.<br>(예: 2025-01-15)', true);
+        showAlertModal('날짜를 YYYY-MM-DD 형식으로 입력해주세요.<br>(예: 2025-01-01)', true);
         return;
       }
 
@@ -248,7 +248,7 @@ async function handleSignup() {
   } catch (error) {
     console.error('회원가입 오류:', error);
     if (error.message === 'Firebase 초기화 실패') {
-      showAlertModal('Firebase 연결에 실패했습니다. 인터넷 연결을 확인해주세요.', true);
+      showAlertModal('연결에 실패했습니다.<br>인터넷 연결을 확인해주세요.', true);
     } else {
       switch (error.code) {
         case 'auth/email-already-in-use':
@@ -261,7 +261,7 @@ async function handleSignup() {
           showAlertModal('올바르지 않은 이메일 형식입니다.', true);
           break;
         default:
-          showAlertModal('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.', true);
+          showAlertModal('회원가입 중 오류가 발생했습니다.<br>다시 시도해주세요.', true);
       }
     }
   } finally {
@@ -288,11 +288,11 @@ async function handleLogin() {
     console.error('로그인 오류:', error);
     
     if (error.message === 'Firebase 초기화 실패') {
-      showAlertModal('Firebase 연결에 실패했습니다. 인터넷 연결을 확인해주세요.', true);
+      showAlertModal('연결에 실패했습니다.<br>인터넷 연결을 확인해주세요.', true);
     } else {
       switch (error.code) {
         case 'auth/user-not-found':
-          showAlertModal('존재하지 않는 사용자입니다. 먼저 회원가입을 해주세요.', true);
+          showAlertModal('존재하지 않는 사용자입니다.<br>먼저 회원가입을 해주세요.', true);
           break;
         case 'auth/wrong-password':
           showAlertModal('비밀번호가 올바르지 않습니다.', true);
@@ -301,13 +301,13 @@ async function handleLogin() {
           showAlertModal('올바르지 않은 이메일 형식입니다.', true);
           break;
         case 'auth/too-many-requests':
-          showAlertModal('너무 많은 로그인 시도가 있었습니다. 잠시 후 다시 시도해주세요.', true);
+          showAlertModal('너무 많은 로그인 시도가 있었습니다.<br>잠시 후 다시 시도해주세요.', true);
           break;
         case 'auth/invalid-credential':
-          showAlertModal('잘못된 로그인 정보입니다. 이메일과 비밀번호를 확인해주세요.', true);
+          showAlertModal('잘못된 로그인 정보입니다.<br>이메일과 비밀번호를 확인해주세요.', true);
           break;
         default:
-          showAlertModal('로그인 중 오류가 발생했습니다. 다시 시도해주세요.', true);
+          showAlertModal('로그인 중 오류가 발생했습니다.<br>다시 시도해주세요.', true);
       }
     }
   } finally {
@@ -365,7 +365,7 @@ async function saveUserData() {
     
   } catch (error) {
     console.error('데이터 저장 오류:', error);
-    showAlertModal('데이터 저장에 실패했습니다. 다시 시도해주세요.', true);
+    showAlertModal('데이터 저장에 실패했습니다.<br>다시 시도해주세요.', true);
     throw error;
   }
 }
@@ -430,7 +430,7 @@ async function initAuthListener() {
           showMainScreen();
         } catch (error) {
           console.error('데이터 로드 실패:', error);
-          showAlertModal('데이터 로드에 실패했습니다. 다시 로그인해주세요.', true);
+          showAlertModal('데이터 로드에 실패했습니다.<br>다시 로그인해주세요.', true);
           await handleLogout();
         }
       } else {
@@ -445,7 +445,7 @@ async function initAuthListener() {
     });
   } catch (error) {
     console.error('Firebase 초기화 실패:', error);
-    showAlertModal('Firebase 연결에 실패했습니다. 페이지를 새로고침해주세요.', true);
+    showAlertModal('연결에 실패했습니다.<br>페이지를 새로고침해주세요.', true);
   }
 }
 
@@ -487,7 +487,7 @@ async function autoSave() {
       console.log('자동 저장 완료');
     } catch (error) {
       console.error('자동 저장 실패:', error);
-      showAlertModal('저장에 실패했습니다. 네트워크를 확인해주세요.', true);
+      showAlertModal('저장에 실패했습니다.<br>네트워크를 확인해주세요.', true);
     }
   } else {
     console.error('자동 저장 실패: 사용자가 로그인되지 않음');
@@ -549,7 +549,7 @@ addFriendBtn.onclick = () => {
         console.error('친구 추가 저장 실패:', error);
         // 롤백
         delete friends[trimmedName];
-        showAlertModal('저장에 실패했습니다. 다시 시도해주세요.', true);
+        showAlertModal('저장에 실패했습니다.<br>다시 시도해주세요.', true);
       }
     } else {
       console.log('빈 이름 입력됨');
@@ -892,7 +892,7 @@ deleteFriendBtn.onclick = () => {
       console.error('삭제 저장 실패:', error);
       // 롤백
       friends[sel] = backupData;
-      showAlertModal('삭제에 실패했습니다. 다시 시도해주세요.', true);
+      showAlertModal('삭제에 실패했습니다.<br>다시 시도해주세요.', true);
     }
     
     document.body.removeChild(modalDiv);
@@ -964,7 +964,7 @@ editFriendBtn.onclick = () => {
         friends = rollbackFriends;
         currentFriend = oldFriend;
         friendTitle.textContent = oldFriend;
-        showAlertModal('저장에 실패했습니다. 다시 시도해주세요.', true);
+        showAlertModal('저장에 실패했습니다.<br>다시 시도해주세요.', true);
       }
     }
   }, false, false);
