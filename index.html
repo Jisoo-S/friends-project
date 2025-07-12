@@ -13,7 +13,7 @@
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
     import { getFirestore, doc, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-    // Firebase 설정 (여기에 본인의 Firebase 설정을 넣어주세요)
+    // Firebase 설정
     const firebaseConfig = {
       apiKey: "AIzaSyBXCbQ00Gruy6IL9LiWe7n148P6OU7WCyM",
       authDomain: "friends-fad33.firebaseapp.com",
@@ -64,7 +64,7 @@
 
   <!-- 홈 화면 -->
   <div id="home-screen" class="screen" style="display: none;">
-    <button class="logout-btn" id="logout-btn" onclick="handleLogout()">Logout</button>
+    <button class="logout-btn" id="logout-btn">Logout</button>
     <h1>nice to meet you!</h1>
     <div id="folder-list" class="folder-list"></div>
     <div style="margin-top:80px; display:flex; justify-content:center; align-items:center;">
@@ -80,10 +80,6 @@
       <button id="edit-friend" style="font-size:18px; background:#ffccdd; border:none; border-radius:8px; padding:6px 16px; cursor:pointer;">edit</button>
     </div>
     <h1 id="friend-title" class="center-title"></h1>
-    <div class="pagination-buttons">
-      <button id="prevPage" onclick="changePage(-1)" hidden>&lt;</button>
-      <button id="nextPage" onclick="changePage(1)" hidden>&gt;</button>
-    </div>
 
     <div class="nav-buttons">
       <button id="prevPage" onclick="changePage(-1)">←</button>

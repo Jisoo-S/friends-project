@@ -74,11 +74,17 @@ function setLoading(isLoading) {
 
 // Firebase 초기화 대기
 function waitForFirebase() {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5초 대기
+    
     const checkFirebase = () => {
       if (window.auth && window.db) {
         resolve();
+      } else if (attempts >= maxAttempts) {
+        reject(new Error('Firebase 초기화 실패'));
       } else {
+        attempts++;
         setTimeout(checkFirebase, 100);
       }
     };
@@ -116,11 +122,15 @@ function isValidDateFormat(dateString) {
          date.getDate() === day;
 }
 
-// 모달 함수 정의 (delete 버튼 포함)
+// 모달 함수 정의
 function showModal(title, defaultValue, callback, isDateModal = false, hasExistingDate = false) {
-  console.log('모달 호출:', { title, defaultValue, isDateModal, hasExistingDate });
-  
   document.getElementById('modal-title').textContent = title;
+  
+  // date 또는 change date 모달인 경우 설명 추가
+  if (title === "change date" || title === "date") {
+    document.getElementById('modal-title').innerHTML = title + '<br><small style="font-size:14px;color:#666;font-weight:normal;">(yyyy-mm-dd)</small>';
+  }
+  
   modalInput.value = defaultValue;
   modal.classList.remove('hidden');
   modalInput.focus();
@@ -145,7 +155,6 @@ function showModal(title, defaultValue, callback, isDateModal = false, hasExisti
   // Delete 버튼 (조건 확인)
   let deleteButton = null;
   if (title === "change date" && hasExistingDate) {
-    console.log('Delete 버튼 생성');
     deleteButton = document.createElement('button');
     deleteButton.textContent = 'Delete';
     deleteButton.style.cssText = 'font-size: 18px; padding: 8px 20px; background: #ff6b6b; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: "Spicy Rice", "Gowun Dodum", cursive, sans-serif;';
@@ -178,7 +187,6 @@ function showModal(title, defaultValue, callback, isDateModal = false, hasExisti
   // Delete 버튼 이벤트
   if (deleteButton) {
     deleteButton.onclick = () => {
-      console.log('Delete 클릭');
       modal.classList.add('hidden');
       callback(null, true);
     };
@@ -223,14 +231,11 @@ async function handleSignup() {
     return;
   }
 
-  if (!window.auth || !window.db) {
-    showAlertModal('Firebase 설정이 완료되지 않았습니다. 임시로 회원가입합니다. 이제 로그인해주세요!', false);
-    return;
-  }
-
   setLoading(true);
   
   try {
+    await waitForFirebase();
+    
     const userCredential = await window.createUserWithEmailAndPassword(window.auth, email, password);
     
     await window.setDoc(window.doc(window.db, 'users', userCredential.user.uid), {
@@ -242,18 +247,22 @@ async function handleSignup() {
     showAlertModal('회원가입이 완료되었습니다!', false);
   } catch (error) {
     console.error('회원가입 오류:', error);
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        showAlertModal('이미 사용 중인 이메일입니다.', true);
-        break;
-      case 'auth/weak-password':
-        showAlertModal('비밀번호가 너무 약합니다.', true);
-        break;
-      case 'auth/invalid-email':
-        showAlertModal('올바르지 않은 이메일 형식입니다.', true);
-        break;
-      default:
-        showAlertModal('회원가입 중 오류가 발생했습니다. Firebase 설정을 확인해주세요.', true);
+    if (error.message === 'Firebase 초기화 실패') {
+      showAlertModal('Firebase 연결에 실패했습니다. 인터넷 연결을 확인해주세요.', true);
+    } else {
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          showAlertModal('이미 사용 중인 이메일입니다.', true);
+          break;
+        case 'auth/weak-password':
+          showAlertModal('비밀번호가 너무 약합니다.', true);
+          break;
+        case 'auth/invalid-email':
+          showAlertModal('올바르지 않은 이메일 형식입니다.', true);
+          break;
+        default:
+          showAlertModal('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.', true);
+      }
     }
   } finally {
     setLoading(false);
@@ -265,10 +274,6 @@ async function handleLogin() {
   const email = usernameInput.value.trim();
   const password = passwordInput.value.trim();
   
-  console.log('로그인 시도:', email);
-  console.log('Firebase Auth 상태:', !!window.auth);
-  console.log('Firebase DB 상태:', !!window.db);
-  
   if (!email || !password) {
     showAlertModal('이메일과 비밀번호를 모두 입력해주세요.', true);
     return;
@@ -276,32 +281,14 @@ async function handleLogin() {
 
   setLoading(true);
 
-  if (!window.auth || !window.db) {
-    console.log('Firebase 미연결');
-    showAlertModal('Firebase가 아직 로드되지 않았습니다. 임시 모드로 로그인합니다.', false);
-    currentUser = { uid: 'temp-user-' + Date.now(), email: email };
-    friends = {};
-    showMainScreen();
-    setLoading(false);
-    return;
-  }
-  
   try {
-    console.log('Firebase 로그인 시도 시작');
-    const userCredential = await window.signInWithEmailAndPassword(window.auth, email, password);
-    console.log('로그인 성공:', userCredential.user.email);
+    await waitForFirebase();
+    await window.signInWithEmailAndPassword(window.auth, email, password);
   } catch (error) {
-    console.error('로그인 오류 상세:', error);
-    console.log('오류 코드:', error.code);
-    console.log('오류 메시지:', error.message);
+    console.error('로그인 오류:', error);
     
-    if (error.code === 'auth/configuration-not-found' || 
-        error.code === 'auth/invalid-api-key' ||
-        error.message.includes('Firebase')) {
-      showAlertModal('Firebase Authentication이 설정되지 않았습니다. 임시 모드로 로그인합니다.', false);
-      currentUser = { uid: 'temp-user-' + Date.now(), email: email };
-      friends = {};
-      showMainScreen();
+    if (error.message === 'Firebase 초기화 실패') {
+      showAlertModal('Firebase 연결에 실패했습니다. 인터넷 연결을 확인해주세요.', true);
     } else {
       switch (error.code) {
         case 'auth/user-not-found':
@@ -320,7 +307,7 @@ async function handleLogin() {
           showAlertModal('잘못된 로그인 정보입니다. 이메일과 비밀번호를 확인해주세요.', true);
           break;
         default:
-          showAlertModal(`로그인 중 오류가 발생했습니다: ${error.code} - ${error.message}`, true);
+          showAlertModal('로그인 중 오류가 발생했습니다. 다시 시도해주세요.', true);
       }
     }
   } finally {
@@ -329,7 +316,7 @@ async function handleLogin() {
 }
 
 // 로그아웃 기능
-window.handleLogout = async function() {
+async function handleLogout() {
   try {
     if (currentUser) {
       await saveUserData();
@@ -359,89 +346,114 @@ function showMainScreen() {
 
 // 사용자 데이터 저장
 async function saveUserData() {
-  if (currentUser) {
-    try {
-      await window.setDoc(window.doc(window.db, 'users', currentUser.uid), {
-        email: currentUser.email,
-        friends: friends,
-        lastUpdated: new Date().toISOString()
-      }, { merge: true });
-      console.log('데이터가 성공적으로 저장되었습니다.');
-    } catch (error) {
-      console.error('데이터 저장 오류:', error);
-      
-      if (error.code === 'permission-denied') {
-        showAlertModal('데이터 저장 권한이 없습니다. Firebase 보안 규칙을 확인해주세요.', true);
-      } else if (error.code === 'unavailable') {
-        console.log('Firestore 일시적으로 사용 불가, 재시도합니다.');
-        setTimeout(() => saveUserData(), 2000);
-      } else {
-        console.log('저장 오류 발생, 로컬에 임시 저장합니다.');
-      }
-    }
+  if (!currentUser || !window.db) {
+    console.error('사용자 또는 DB가 없습니다:', { currentUser: !!currentUser, db: !!window.db });
+    return;
+  }
+  
+  try {
+    console.log('저장 시도 중:', friends);
+    
+    // merge: false로 설정하여 전체 문서를 덮어쓰기
+    await window.setDoc(window.doc(window.db, 'users', currentUser.uid), {
+      email: currentUser.email,
+      friends: friends,
+      lastUpdated: new Date().toISOString()
+    }, { merge: false }); // 전체 덮어쓰기
+    
+    console.log('데이터가 성공적으로 저장되었습니다:', Object.keys(friends));
+    
+  } catch (error) {
+    console.error('데이터 저장 오류:', error);
+    showAlertModal('데이터 저장에 실패했습니다. 다시 시도해주세요.', true);
+    throw error;
   }
 }
 
 // 사용자 데이터 로드
 async function loadUserData() {
-  if (currentUser) {
-    try {
-      const docRef = window.doc(window.db, 'users', currentUser.uid);
-      const docSnap = await window.getDoc(docRef);
+  if (!currentUser || !window.db) return;
+  
+  try {
+    console.log('=== 데이터 로드 시작 ===');
+    console.log('사용자 ID:', currentUser.uid);
+    
+    const docRef = window.doc(window.db, 'users', currentUser.uid);
+    const docSnap = await window.getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      console.log('Firebase에서 받은 전체 데이터:', userData);
       
-      if (docSnap.exists()) {
-        const userData = docSnap.data();
-        friends = userData.friends || {};
-        console.log('데이터 로드 완료:', Object.keys(friends).length, '개의 친구');
-      } else {
-        console.log('사용자 문서가 존재하지 않습니다. 새 문서를 생성합니다.');
-        friends = {};
-        await saveUserData();
-      }
-    } catch (error) {
-      console.error('데이터 로드 오류:', error);
+      const loadedFriends = userData.friends;
+      console.log('로드된 friends 데이터:', loadedFriends);
+      console.log('로드된 friends 타입:', typeof loadedFriends);
       
-      if (error.code === 'permission-denied') {
-        showAlertModal('데이터 접근 권한이 없습니다. Firebase 보안 규칙을 확인해주세요.', true);
-        friends = {};
-      } else if (error.code === 'unavailable') {
-        console.log('Firestore 일시적으로 사용 불가, 빈 데이터로 시작합니다.');
-        friends = {};
+      if (loadedFriends && typeof loadedFriends === 'object') {
+        friends = { ...loadedFriends }; // 객체 복사
       } else {
-        console.log('로드 오류 발생, 빈 데이터로 시작합니다.');
         friends = {};
       }
+      
+      console.log('최종 설정된 friends:', friends);
+      console.log('friends의 키들:', Object.keys(friends));
+    } else {
+      console.log('사용자 문서가 존재하지 않습니다. 새 문서를 생성합니다.');
+      friends = {};
+      await saveUserData();
     }
+    
+    console.log('=== 데이터 로드 완료 ===');
+  } catch (error) {
+    console.error('데이터 로드 오류:', error);
+    friends = {};
+    throw error;
   }
 }
 
 // 인증 상태 변화 감지
 async function initAuthListener() {
-  await waitForFirebase();
-  
-  window.onAuthStateChanged(window.auth, async (user) => {
-    if (user) {
-      console.log('사용자 로그인됨:', user.email);
-      currentUser = user;
-      await loadUserData();
-      showMainScreen();
-    } else {
-      console.log('사용자 로그아웃됨');
-      currentUser = null;
-      friends = {};
-      showLoginScreen();
-      
-      if (usernameInput) usernameInput.value = '';
-      if (passwordInput) passwordInput.value = '';
-    }
-  });
+  try {
+    await waitForFirebase();
+    
+    window.onAuthStateChanged(window.auth, async (user) => {
+      if (user) {
+        console.log('사용자 로그인됨:', user.email);
+        currentUser = user;
+        
+        // friends 객체 초기화
+        friends = {};
+        
+        try {
+          await loadUserData();
+          console.log('로그인 후 friends 상태:', friends);
+          showMainScreen();
+        } catch (error) {
+          console.error('데이터 로드 실패:', error);
+          showAlertModal('데이터 로드에 실패했습니다. 다시 로그인해주세요.', true);
+          await handleLogout();
+        }
+      } else {
+        console.log('사용자 로그아웃됨');
+        currentUser = null;
+        friends = {};
+        showLoginScreen();
+        
+        if (usernameInput) usernameInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+      }
+    });
+  } catch (error) {
+    console.error('Firebase 초기화 실패:', error);
+    showAlertModal('Firebase 연결에 실패했습니다. 페이지를 새로고침해주세요.', true);
+  }
 }
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
   if (loginBtn) loginBtn.addEventListener('click', handleLogin);
   if (signupBtn) signupBtn.addEventListener('click', handleSignup);
-  if (logoutBtn) logoutBtn.addEventListener('click', window.handleLogout);
+  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
   if (passwordInput) {
     passwordInput.addEventListener('keypress', (e) => {
@@ -460,20 +472,87 @@ function setupEventListeners() {
   }
 }
 
+// 홈으로 돌아가기
+backButton.onclick = () => {
+  stampScreen.style.display = 'none';
+  homeScreen.style.display = 'block';
+};
+
 // 자동 저장 함수
 async function autoSave() {
   if (currentUser) {
-    await saveUserData();
+    try {
+      console.log('자동 저장 시작...');
+      await saveUserData();
+      console.log('자동 저장 완료');
+    } catch (error) {
+      console.error('자동 저장 실패:', error);
+      showAlertModal('저장에 실패했습니다. 네트워크를 확인해주세요.', true);
+    }
+  } else {
+    console.error('자동 저장 실패: 사용자가 로그인되지 않음');
   }
 }
 
 // add friend 버튼
 addFriendBtn.onclick = () => {
+  console.log('=== ADD FRIEND 버튼 클릭 ===');
+  console.log('현재 friends 상태:', friends);
+  console.log('friends 타입:', typeof friends);
+  console.log('friends가 null인가?', friends === null);
+  console.log('friends가 undefined인가?', friends === undefined);
+  
   showModal("Write your friend's name!", "", async (name) => {
-    if (name && !friends[name]) {
-      friends[name] = [];
-      renderFolders();
-      await autoSave();
+    if (name && name.trim()) {
+      const trimmedName = name.trim();
+      
+      console.log('=== 친구 추가 과정 시작 ===');
+      console.log('입력된 이름:', `"${trimmedName}"`);
+      console.log('현재 friends:', friends);
+      
+      // friends가 undefined이거나 null인 경우 빈 객체로 초기화
+      if (!friends || typeof friends !== 'object') {
+        console.log('friends 객체 초기화 중...');
+        friends = {};
+      }
+      
+      console.log('초기화 후 friends:', friends);
+      console.log('friends의 키들:', Object.keys(friends));
+      
+      // 각 키와 비교
+      const existingKeys = Object.keys(friends);
+      for (let key of existingKeys) {
+        console.log(`키 "${key}"와 입력값 "${trimmedName}" 비교:`, key === trimmedName);
+      }
+      
+      const alreadyExists = !!friends[trimmedName];
+      console.log('이미 존재하는가?', alreadyExists);
+      
+      if (alreadyExists) {
+        console.log('중복 이름으로 판단되어 경고 표시');
+        showAlertModal('이미 존재하는 친구 이름입니다.', true);
+        return;
+      }
+      
+      console.log('새 친구 추가 진행');
+      friends[trimmedName] = [];
+      
+      console.log('추가 후 friends 객체:', friends);
+      console.log('추가 후 friends의 키들:', Object.keys(friends));
+      
+      try {
+        await saveUserData();
+        console.log('친구 추가 저장 완료');
+        renderFolders();
+        showAlertModal('친구가 성공적으로 추가되었습니다.', false);
+      } catch (error) {
+        console.error('친구 추가 저장 실패:', error);
+        // 롤백
+        delete friends[trimmedName];
+        showAlertModal('저장에 실패했습니다. 다시 시도해주세요.', true);
+      }
+    } else {
+      console.log('빈 이름 입력됨');
     }
   }, false, false);
 };
@@ -511,8 +590,15 @@ function createFolderElement(name) {
 function renderFolders() {
   folderList.innerHTML = '';
   
+  // friends가 올바른 객체인지 확인
+  if (!friends || typeof friends !== 'object') {
+    friends = {};
+  }
+  
   const friendNames = Object.keys(friends);
   const totalFolders = friendNames.length;
+  
+  console.log('renderFolders 호출:', friendNames);
   
   if (window.innerWidth > 600) {
     const rowsNeeded = Math.ceil(totalFolders / 5);
@@ -560,12 +646,37 @@ function openStampPage(name) {
   homeScreen.style.display = 'none';
   stampScreen.style.display = 'block';
   friendTitle.textContent = name;
+  
+  // 버튼 강제로 보이게 만들기
+  setTimeout(() => {
+    const prevButton = document.getElementById('prevPage');
+    const nextButton = document.getElementById('nextPage');
+    
+    console.log('openStampPage에서 버튼 확인:');
+    console.log('prevButton:', prevButton);
+    console.log('nextButton:', nextButton);
+    
+    if (prevButton) {
+      prevButton.style.display = 'block';
+      prevButton.style.visibility = 'visible';
+      prevButton.style.opacity = '1';
+      console.log('← 버튼 강제 표시됨');
+    }
+    
+    if (nextButton) {
+      nextButton.style.display = 'block';
+      nextButton.style.visibility = 'visible';
+      nextButton.style.opacity = '1';
+      console.log('→ 버튼 강제 표시됨');
+    }
+  }, 100);
+  
   renderStamps();
   updateButtons();
 }
 
 function renderStamps() {
-  const stamps = friends[currentFriend];
+  const stamps = friends[currentFriend] || [];
   const sorted = [...stamps].sort((a, b) => new Date(a) - new Date(b));
 
   const start = currentPage * maxStarsPerPage;
@@ -574,6 +685,14 @@ function renderStamps() {
   stampPagesContainer.innerHTML = '';
   const page = document.createElement('div');
   page.className = 'stamp-page';
+
+  console.log('스탬프 렌더링:', {
+    totalStamps: stamps.length,
+    currentPage,
+    start,
+    end,
+    maxStarsPerPage
+  });
 
   for (let i = 0; i < maxStarsPerPage; i++) {
     const globalIndex = start + i;
@@ -601,12 +720,12 @@ function renderStamps() {
               updateButtons();
               await autoSave();
             }
-          } else if (date) {
+          } else if (date && date.trim()) {
             if (thisStamp) {
               const originalIndex = stamps.indexOf(thisStamp);
-              stamps[originalIndex] = date;
+              stamps[originalIndex] = date.trim();
             } else {
-              stamps.push(date);
+              stamps.push(date.trim());
 
               const total = stamps.length;
               const newTotalPages = Math.ceil(total / maxStarsPerPage);
@@ -642,7 +761,14 @@ function renderStamps() {
 
 function getTotalPages() {
   const stamps = friends[currentFriend] || [];
-  return Math.max(1, Math.ceil(stamps.length / maxStarsPerPage));
+  const totalPages = Math.max(1, Math.ceil(stamps.length / maxStarsPerPage));
+  console.log('총 페이지 계산:', {
+    friend: currentFriend,
+    stampsCount: stamps.length,
+    maxStarsPerPage,
+    totalPages
+  });
+  return totalPages;
 }
 
 // 페이지 전환
@@ -656,41 +782,57 @@ function updateButtons() {
   const prevButton = document.getElementById('prevPage');
   const nextButton = document.getElementById('nextPage');
   
+  console.log('updateButtons 호출됨');
+  console.log('prevButton:', prevButton);
+  console.log('nextButton:', nextButton);
+  
+  // 버튼 강제로 보이게 만들기
   if (prevButton) {
-    prevButton.style.visibility = currentPage === 0 ? "hidden" : "visible";
+    prevButton.style.display = 'block';
+    prevButton.style.visibility = 'visible';
+    prevButton.style.opacity = '1';
+    if (currentPage === 0) {
+      prevButton.style.opacity = '0.3';
+    } else {
+      prevButton.style.opacity = '1';
+    }
   }
   
   if (nextButton) {
-    nextButton.style.visibility = currentPage >= getTotalPages() - 1 ? "hidden" : "visible";
+    nextButton.style.display = 'block';
+    nextButton.style.visibility = 'visible';
+    nextButton.style.opacity = '1';
+    if (currentPage >= getTotalPages() - 1) {
+      nextButton.style.opacity = '0.3';
+    } else {
+      nextButton.style.opacity = '1';
+    }
   }
 }
 
+// 전역에서 사용할 수 있도록 설정
 window.changePage = changePage;
 
-// 홈으로 돌아가기
-backButton.onclick = () => {
-  stampScreen.style.display = 'none';
-  homeScreen.style.display = 'block';
-};
+// 이벤트 리스너 설정 (기존 코드 제거)
+// prevBtn.onclick = () => changePage(-1);
+// nextBtn.onclick = () => changePage(1);
+
+// 홈으로 돌아가기 (setupEventListeners로 이동됨)
+// backButton.onclick = () => {
+//   stampScreen.style.display = 'none';
+//   homeScreen.style.display = 'block';
+// };
 
 // delete 버튼 기능
 deleteFriendBtn.onclick = () => {
+  // friends가 올바른 객체인지 확인
+  if (!friends || typeof friends !== 'object') {
+    friends = {};
+  }
+  
   const friendNames = Object.keys(friends);
   if (friendNames.length === 0) {
-    const modalDiv = document.createElement('div');
-    modalDiv.className = 'modal';
-    modalDiv.style.display = 'flex';
-    modalDiv.style.alignItems = 'center';
-    modalDiv.style.justifyContent = 'center';
-    modalDiv.style.zIndex = '2000';
-    modalDiv.innerHTML = `
-      <div class="modal-content" style="display:flex;flex-direction:column;align-items:center;">
-        <span class="modal-close" style="position:absolute;right:20px;top:10px;font-size:24px;cursor:pointer;">&times;</span>
-        <h2 style="margin-bottom:24px;">There is no file to delete.</h2>
-      </div>
-    `;
-    document.body.appendChild(modalDiv);
-    modalDiv.querySelector('.modal-close').onclick = () => document.body.removeChild(modalDiv);
+    showAlertModal('삭제할 친구가 없습니다.', false);
     return;
   }
 
@@ -717,9 +859,42 @@ deleteFriendBtn.onclick = () => {
   modalDiv.querySelector('.modal-close').onclick = () => document.body.removeChild(modalDiv);
   modalDiv.querySelector('#delete-confirm').onclick = async () => {
     const sel = modalDiv.querySelector('#delete-select').value;
-    delete friends[sel];
-    renderFolders();
-    await autoSave();
+    
+    console.log('=== 친구 삭제 시작 ===');
+    console.log('삭제할 친구:', sel);
+    console.log('삭제 전 friends 객체:', Object.keys(friends));
+    
+    // 백업
+    const backupData = friends[sel];
+    
+    // 새로운 friends 객체 생성 (삭제할 친구 제외)
+    const newFriends = {};
+    Object.keys(friends).forEach(key => {
+      if (key !== sel) {
+        newFriends[key] = [...friends[key]];
+      }
+    });
+    
+    // friends 객체 교체
+    friends = newFriends;
+    
+    console.log('삭제 후 friends 객체:', Object.keys(friends));
+    console.log('전체 friends:', friends);
+    
+    try {
+      console.log('저장 중...');
+      await saveUserData();
+      console.log('=== 친구 삭제 완료 ===');
+      
+      renderFolders();
+      showAlertModal('친구가 성공적으로 삭제되었습니다.', false);
+    } catch (error) {
+      console.error('삭제 저장 실패:', error);
+      // 롤백
+      friends[sel] = backupData;
+      showAlertModal('삭제에 실패했습니다. 다시 시도해주세요.', true);
+    }
+    
     document.body.removeChild(modalDiv);
   };
 };
@@ -729,13 +904,68 @@ const editFriendBtn = document.getElementById('edit-friend');
 editFriendBtn.onclick = () => {
   if (!currentFriend) return;
   showModal("Edit friend's name", currentFriend, async (newName) => {
-    if (newName && newName !== currentFriend) {
-      friends[newName] = friends[currentFriend];
-      delete friends[currentFriend];
-      currentFriend = newName;
-      friendTitle.textContent = newName;
-      renderFolders();
-      await autoSave();
+    if (newName && newName.trim() && newName.trim() !== currentFriend) {
+      const trimmedName = newName.trim();
+      if (friends[trimmedName]) {
+        showAlertModal('이미 존재하는 친구 이름입니다.', true);
+        return;
+      }
+      
+      console.log('=== 친구 이름 수정 시작 ===');
+      console.log('변경 전:', currentFriend);
+      console.log('변경 후:', trimmedName);
+      console.log('변경 전 friends 객체:', Object.keys(friends));
+      
+      // 백업
+      const oldFriend = currentFriend;
+      const friendData = [...friends[currentFriend]];
+      
+      // 새로운 friends 객체 생성 (완전히 새로 만들기)
+      const newFriends = {};
+      Object.keys(friends).forEach(key => {
+        if (key === oldFriend) {
+          newFriends[trimmedName] = [...friends[key]];
+        } else {
+          newFriends[key] = [...friends[key]];
+        }
+      });
+      
+      // friends 객체 교체
+      friends = newFriends;
+      
+      console.log('변경 후 friends 객체:', Object.keys(friends));
+      console.log('전체 friends:', friends);
+      
+      // 현재 상태 업데이트
+      currentFriend = trimmedName;
+      friendTitle.textContent = trimmedName;
+      
+      try {
+        // 강제 저장
+        console.log('저장 중...');
+        await saveUserData();
+        console.log('=== 친구 이름 수정 완료 ===');
+        
+        // 화면 업데이트
+        renderFolders();
+        
+        showAlertModal('친구 이름이 성공적으로 변경되었습니다.', false);
+      } catch (error) {
+        // 실패 시 롤백
+        console.error('저장 실패, 롤백 중:', error);
+        const rollbackFriends = {};
+        Object.keys(newFriends).forEach(key => {
+          if (key === trimmedName) {
+            rollbackFriends[oldFriend] = friendData;
+          } else {
+            rollbackFriends[key] = [...newFriends[key]];
+          }
+        });
+        friends = rollbackFriends;
+        currentFriend = oldFriend;
+        friendTitle.textContent = oldFriend;
+        showAlertModal('저장에 실패했습니다. 다시 시도해주세요.', true);
+      }
     }
   }, false, false);
 };
