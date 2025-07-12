@@ -232,18 +232,21 @@ h1 {
 .nav-buttons button {
   background: white;
   border: 2px solid #ddd;
-  padding: 8px 12px;
+  padding: 4px 8px; /* 더 작은 패딩 */
   border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px; /* 폰트 크기 줄임 */
   font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 30px; /* 더 작게 */
+  min-height: 20px; /* 더 작게 */
+  height: 28px; /* 강제로 높이 지정 */
   color: #333;
   font-weight: bold;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  line-height: 1; /* 줄 간격 최소화 */
+  box-sizing: border-box; /* 박스 크기 계산 방식 */
 }
 
 .nav-buttons button:hover {
@@ -273,9 +276,10 @@ h1 {
   }
 
   #stamp-screen {
-    width: 90%;
-    max-width: 350px;
-    padding: 20px;
+    width: 95%; /* 90%에서 95%로 증가 */
+    max-width: 400px; /* 350px에서 400px로 증가 */
+    padding: 25px; /* 20px에서 25px로 증가 */
+    margin: 20px auto; /* 상하 마진 추가 */
   }
 
   /* 모바일 로그인 화면 */
@@ -325,10 +329,12 @@ h1 {
   }
 
   .nav-buttons button {
-    min-width: 40px;
-    min-height: 40px;
-    padding: 8px 12px;
-    font-size: 16px;
+    min-width: 30px; /* 더 작게 */
+    min-height: 20px; /* 더 작게 */
+    height: 28px; /* 강제로 높이 지정 */
+    padding: 4px 8px; /* 더 작은 패딩 */
+    font-size: 14px; /* 폰트 크기 줄임 */
+    line-height: 1; /* 줄 간격 최소화 */
   }
 }
 
