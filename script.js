@@ -875,7 +875,7 @@ function renderFolders() {
       // 모바일 버전: 2개씩 나열 (원래대로)
       colorGroup.style.display = 'grid';
       colorGroup.style.gridTemplateColumns = 'repeat(2, 1fr)';
-      colorGroup.style.columnGap = '60px'; // 가로 간격만 조정
+      colorGroup.style.columnGap = '80px'; // 가로 간격만 조정
       colorGroup.style.rowGap = '25px'; // 세로 간격은 원래대로 유지
       colorGroup.style.justifyItems = 'center';
       
