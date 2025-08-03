@@ -1,0 +1,67 @@
+#home-screen {
+  background: #cdefff;
+  min-height: 100vh;
+  padding: 40px;
+  position: relative;
+}
+
+.logout-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #ff69b4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+}
+
+.action-btn {
+  background: white;
+  color: pink;
+  font-size: 24px;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 3px 3px 10px #bbb;
+  min-width: 180px;
+  min-height: 60px;
+  margin: 0 10px;
+  transition: box-shadow 0.2s;
+}
+
+.action-btn:active {
+  box-shadow: 1px 1px 4px #bbb;
+}
+
+#add-friend {
+  background: white;
+  color: #e75480;
+}
+
+#delete-friend {
+  background: white;
+  color: #2271b1;
+}
+
+@media (max-width: 600px) {
+  #home-screen {
+    padding: 20px;
+  }
+  
+  #home-screen h1 {
+    margin-top: 60px;
+    margin-bottom: 30px;
+  }
+  
+  #add-friend, #delete-friend {
+    font-size: 18px;
+    padding: 8px 18px;
+    min-width: 110px;
+    min-height: 40px;
+  }
+}

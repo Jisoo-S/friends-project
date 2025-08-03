@@ -1,0 +1,17 @@
+.App {
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #cdefff;
+  font-size: 24px;
+  color: #2271b1;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+}

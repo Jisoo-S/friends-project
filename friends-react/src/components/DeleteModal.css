@@ -1,0 +1,20 @@
+#delete-select {
+  font-size: 18px;
+  padding: 8px;
+  width: 80%;
+  margin-bottom: 32px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#delete-confirm {
+  font-size: 18px;
+  padding: 12px 40px;
+  background: #ffccdd;
+  color: black;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+  margin-top: 12px;
+}
