@@ -49,7 +49,6 @@ const StampScreen = ({
   };
 
   const handleStarClick = (localIndex, existingStamp) => {
-    const globalIndex = currentPage * maxStarsPerPage + localIndex;
     
     onShowModal(
       existingStamp ? "change date" : "date",
