@@ -53,7 +53,7 @@ const StampScreen = ({
     onShowModal(
       existingStamp ? "change date" : "date",
       existingStamp || getCurrentDate(),
-      (date, isDelete) => {
+      async (date, isDelete) => {
         const friendData = friends[currentFriend];
         const stamps = friendData && friendData.stamps ? [...friendData.stamps] : [];
 
@@ -61,7 +61,7 @@ const StampScreen = ({
           const originalIndex = stamps.indexOf(existingStamp);
           if (originalIndex !== -1) {
             stamps.splice(originalIndex, 1);
-            onUpdateStamps(currentFriend, stamps);
+            await onUpdateStamps(currentFriend, stamps);
             
             // 삭제 후 페이지 조정
             const newTotalPages = Math.ceil(stamps.length / maxStarsPerPage) || 1;
@@ -91,15 +91,15 @@ const StampScreen = ({
             stamps[originalIndex] = inputValue;
           } else {
             stamps.push(inputValue);
-            
-            // 새 스탬프 추가 후 해당 스탬프가 있는 페이지로 이동
-            const sortedStamps = [...stamps].sort((a, b) => new Date(a) - new Date(b));
-            const newIndex = sortedStamps.indexOf(inputValue);
-            const targetPage = Math.floor(newIndex / maxStarsPerPage);
-            setCurrentPage(targetPage);
           }
 
-          onUpdateStamps(currentFriend, stamps);
+          await onUpdateStamps(currentFriend, stamps);
+
+          // 새 스탬프 추가 또는 수정 후 해당 스탬프가 있는 페이지로 이동
+          const sortedStamps = [...stamps].sort((a, b) => new Date(a) - new Date(b));
+          const newIndex = sortedStamps.indexOf(inputValue);
+          const targetPage = Math.floor(newIndex / maxStarsPerPage);
+          setCurrentPage(targetPage);
         }
       },
       true,

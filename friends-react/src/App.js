@@ -34,16 +34,17 @@ function App() {
   });
 
   // 사용자 데이터 저장
-  const saveData = async () => {
+  const saveData = async (dataToSave) => {
     if (!currentUser) return;
     
     try {
-      await saveUserData(currentUser.uid, {
+      const payload = {
         email: currentUser.email,
-        friends: friends,
-        friendsOrder: friendsOrder,
+        friends: dataToSave.friends,
+        friendsOrder: dataToSave.friendsOrder,
         lastUpdated: new Date().toISOString()
-      });
+      };
+      await saveUserData(currentUser.uid, payload);
       console.log('데이터 저장 완료');
     } catch (error) {
       console.error('데이터 저장 실패:', error);
@@ -181,7 +182,7 @@ function App() {
     setFriends(newFriends);
     setFriendsOrder(newOrder);
     
-    await saveData();
+    await saveData({ friends: newFriends, friendsOrder: newOrder });
     showAlert('성공적으로 추가되었습니다.', false);
   };
 
@@ -195,14 +196,14 @@ function App() {
     setFriends(newFriends);
     setFriendsOrder(newOrder);
     
-    await saveData();
+    await saveData({ friends: newFriends, friendsOrder: newOrder });
     showAlert('성공적으로 삭제되었습니다.', false);
   };
 
   // 친구 순서 업데이트
   const updateFriendsOrder = async (newOrder) => {
     setFriendsOrder(newOrder);
-    await saveData();
+    await saveData({ friends: friends, friendsOrder: newOrder });
   };
 
   // 스탬프 페이지 열기
@@ -222,12 +223,13 @@ function App() {
     };
     
     setFriends(newFriends);
-    await saveData();
+    await saveData({ friends: newFriends, friendsOrder: friendsOrder });
   };
 
   // 친구 정보 수정
   const editFriend = async (oldName, newName, newColor) => {
-    const newFriends = { ...friends };
+    let newFriends = { ...friends };
+    let newOrder = [...friendsOrder];
     const friendData = newFriends[oldName];
     
     if (newName !== oldName) {
@@ -237,8 +239,7 @@ function App() {
         color: newColor || friendData.color
       };
       
-      const orderIndex = friendsOrder.indexOf(oldName);
-      const newOrder = [...friendsOrder];
+      const orderIndex = newOrder.indexOf(oldName);
       if (orderIndex > -1) {
         newOrder[orderIndex] = newName;
       }
@@ -249,7 +250,7 @@ function App() {
     }
     
     setFriends(newFriends);
-    await saveData();
+    await saveData({ friends: newFriends, friendsOrder: newOrder });
     showAlert('정보가 성공적으로 변경되었습니다.', false);
   };
 
