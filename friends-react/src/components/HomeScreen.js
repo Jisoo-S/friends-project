@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { signOutUser } from '../services/firebase';
 import FolderList from './FolderList';
 import DeleteModal from './DeleteModal';

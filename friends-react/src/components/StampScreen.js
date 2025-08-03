@@ -134,13 +134,12 @@ const StampScreen = ({
     const sorted = [...stamps].sort((a, b) => new Date(a) - new Date(b));
 
     const start = currentPage * maxStarsPerPage;
-    const end = start + maxStarsPerPage;
 
     const starsElements = [];
     
     for (let i = 0; i < maxStarsPerPage; i++) {
-      const globalIndex = start + i;
-      const thisStamp = sorted[globalIndex];
+      // const globalIndex = start + i;
+      const thisStamp = sorted[start + i];
 
       starsElements.push(
         <div key={i} style={{ textAlign: 'center' }}>
