@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
-import { createUser, signIn } from '../services/firebase';
+import { createUser, signIn, resetPassword } from '../services/firebase';
 import './LoginScreen.css';
 
 const LoginScreen = ({ onShowAlert }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -100,54 +103,175 @@ const LoginScreen = ({ onShowAlert }) => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!resetEmail.trim()) {
+      onShowAlert('이메일을 입력해주세요.', true);
+      return;
+    }
+
+    if (!isValidEmail(resetEmail)) {
+      onShowAlert('올바른 이메일 형식을 입력해주세요.', true);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await resetPassword(resetEmail);
+      onShowAlert('비밀번호 재설정 이메일을 발송했습니다.<br>이메일을 확인해주세요.', false);
+      setShowResetPassword(false);
+      setResetEmail('');
+    } catch (error) {
+      console.error('비밀번호 재설정 오류:', error);
+      switch (error.code) {
+        case 'auth/user-not-found':
+          onShowAlert('등록되지 않은 이메일입니다.', true);
+          break;
+        case 'auth/invalid-email':
+          onShowAlert('올바르지 않은 이메일 형식입니다.', true);
+          break;
+        default:
+          onShowAlert('비밀번호 재설정 요청에 실패했습니다.<br>다시 시도해주세요.', true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div id="login-screen" className="screen">
-      <div className="login-container">
-        <h1>friends</h1>
-        <input 
-          type="email" 
-          id="username" 
-          placeholder="Email" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyPress={(e) => handleKeyPress(e, true)}
-          disabled={loading}
-        />
-        <input 
-          type="password" 
-          id="password" 
-          placeholder="Password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyPress={(e) => handleKeyPress(e, false)}
-          disabled={loading}
-        />
-        <button 
-          className="login-btn" 
-          style={{ width: '70%' }}
-          onClick={handleLogin}
-          disabled={loading}
-        >
-          Login
-        </button>
-        <button 
-          className="signup-btn" 
-          style={{ width: '70%' }}
-          onClick={handleSignup}
-          disabled={loading}
-        >
-          Sign Up
-        </button>
-        
-        <div className="login-info">
-          처음 로그인 하는 경우에는 id와 password를 적고<br/>회원가입(Sign Up) 버튼을 누른 뒤에 로그인 해주세요!
+      {!showSignup && !showResetPassword ? (
+        // 로그인 화면
+        <div className="login-container">
+          <h1>friends</h1>
+          <input 
+            type="email" 
+            id="username" 
+            placeholder="Email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyPress={(e) => handleKeyPress(e, true)}
+            disabled={loading}
+          />
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={(e) => handleKeyPress(e, false)}
+            disabled={loading}
+          />
+          <button 
+            className="login-btn" 
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            Login
+          </button>
+          
+          <button 
+            className="link-btn signup-link-btn"
+            onClick={() => setShowSignup(true)}
+            disabled={loading}
+          >
+            회원가입
+          </button>
+          
+          <button 
+            className="link-btn password-find-btn"
+            onClick={() => setShowResetPassword(true)}
+            disabled={loading}
+          >
+            비밀번호 찾기
+          </button>
+          
+          {loading && <div className="loading">loading...</div>}
+          
+          <footer className="login-footer">
+            © 2025. Michelle.J.S. All rights reserved.
+          </footer>
         </div>
-        <div className="password-note">
-          *password는 6자리 이상이어야합니다.
+      ) : showSignup ? (
+        // 회원가입 화면
+        <div className="login-container">
+          <h1>Sign Up</h1>
+          <input 
+            type="email" 
+            placeholder="Email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
+          <input 
+            type="password" 
+            placeholder="Password (6자리 이상)" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+          />
+          <button 
+            className="signup-btn" 
+            onClick={handleSignup}
+            disabled={loading}
+          >
+            회원가입
+          </button>
+          
+          <div className="password-note">
+            *password는 6자리 이상이어야합니다.
+          </div>
+          
+          <button 
+            className="back-link-btn"
+            onClick={() => {
+              setShowSignup(false);
+              setEmail('');
+              setPassword('');
+            }}
+            disabled={loading}
+          >
+            ← 로그인 화면으로
+          </button>
+          
+          {loading && <div className="loading">loading...</div>}
         </div>
-        
-        {loading && <div className="loading">loading...</div>}
-      </div>
+      ) : (
+        // 비밀번호 찾기 화면
+        <div className="login-container">
+          <h1>비밀번호 찾기</h1>
+          <p className="reset-info">
+            가입하신 이메일 주소로 비밀번호 재설정 링크를 보내드립니다.
+          </p>
+          <input 
+            type="email" 
+            placeholder="Email" 
+            value={resetEmail}
+            onChange={(e) => setResetEmail(e.target.value)}
+            disabled={loading}
+          />
+          <button 
+            className="reset-btn" 
+            onClick={handleResetPassword}
+            disabled={loading}
+          >
+            재설정 이메일 보내기
+          </button>
+          
+          <button 
+            className="back-link-btn"
+            onClick={() => {
+              setShowResetPassword(false);
+              setResetEmail('');
+            }}
+            disabled={loading}
+          >
+            ← 로그인 화면으로
+          </button>
+          
+          {loading && <div className="loading">loading...</div>}
+        </div>
+      )}
     </div>
   );
 };

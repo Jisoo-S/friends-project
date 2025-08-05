@@ -10,7 +10,8 @@ const HomeScreen = ({
   onAddFriend, 
   onDeleteFriend, 
   onUpdateFriendsOrder,
-  onOpenStampPage, 
+  onOpenStampPage,
+  onOpenSettings, 
   onShowModal,
   onShowAlert 
 }) => {
@@ -57,6 +58,7 @@ const HomeScreen = ({
   return (
     <div id="home-screen" className="screen">
       <button className="logout-btn" onClick={handleLogout}>Logout</button>
+      <button className="settings-btn" onClick={onOpenSettings}>⚙️</button>
       <h1>nice to meet you!</h1>
       
       <FolderList 
@@ -78,6 +80,10 @@ const HomeScreen = ({
           onClose={() => setShowDeleteModal(false)}
         />
       )}
+      
+      <footer className="home-footer">
+        © 2025. Michelle.J.S. All rights reserved.
+      </footer>
     </div>
   );
 };

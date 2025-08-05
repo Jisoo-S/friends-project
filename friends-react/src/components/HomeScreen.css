@@ -18,6 +18,39 @@
   font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
 }
 
+.settings-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  border: 2px solid #2271b1;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  z-index: 100;
+}
+
+.settings-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.home-footer {
+  margin-top: 100px;
+  padding: 20px;
+  font-size: 12px;
+  color: #666;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+  text-align: center;
+}
+
 .action-btn {
   background: white;
   color: pink;
@@ -63,5 +96,18 @@
     padding: 8px 18px;
     min-width: 110px;
     min-height: 40px;
+  }
+
+  .settings-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    bottom: 15px;
+    left: 15px;
+  }
+
+  .home-footer {
+    font-size: 11px;
+    margin-top: 60px;
   }
 }

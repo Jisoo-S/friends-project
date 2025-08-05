@@ -4,7 +4,12 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
-  onAuthStateChanged 
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  updatePassword,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  deleteUser
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -31,6 +36,38 @@ export const db = getFirestore(app);
 export const createUser = (email, password) => createUserWithEmailAndPassword(auth, email, password);
 export const signIn = (email, password) => signInWithEmailAndPassword(auth, email, password);
 export const signOutUser = () => signOut(auth);
+
+// 비밀번호 재설정 이메일 보내기
+export const resetPassword = (email) => sendPasswordResetEmail(auth, email);
+
+// 비밀번호 변경
+export const changePassword = async (currentPassword, newPassword) => {
+  const user = auth.currentUser;
+  if (!user || !user.email) throw new Error('사용자가 로그인되지 않았습니다.');
+  
+  // 재인증
+  const credential = EmailAuthProvider.credential(user.email, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  
+  // 비밀번호 업데이트
+  return updatePassword(user, newPassword);
+};
+
+// 계정 삭제
+export const deleteAccount = async () => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('사용자가 로그인되지 않았습니다.');
+  
+  // 사용자 데이터 삭제 (Firestore에서)
+  try {
+    await setDoc(doc(db, 'users', user.uid), { deleted: true, deletedAt: new Date().toISOString() }, { merge: true });
+  } catch (error) {
+    console.error('사용자 데이터 삭제 오류:', error);
+  }
+  
+  // 계정 삭제
+  return deleteUser(user);
+};
 
 // Firestore 함수들
 export const saveUserData = async (userId, data) => {

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { auth, onAuthStateChanged, saveUserData, getUserData } from './services/firebase';
+import { auth, onAuthStateChanged, saveUserData, getUserData, changePassword, deleteAccount } from './services/firebase';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import StampScreen from './components/StampScreen';
+import SettingsScreen from './components/SettingsScreen';
 import Modal from './components/Modal';
 import AlertModal from './components/AlertModal';
 import './App.css';
@@ -212,6 +213,21 @@ function App() {
     setCurrentScreen('stamp');
   };
 
+  // 설정 페이지 열기
+  const openSettings = () => {
+    setCurrentScreen('settings');
+  };
+
+  // 비밀번호 변경
+  const handleChangePassword = async (currentPassword, newPassword) => {
+    return changePassword(currentPassword, newPassword);
+  };
+
+  // 계정 삭제
+  const handleDeleteAccount = async () => {
+    return deleteAccount();
+  };
+
   // 스탬프 업데이트
   const updateStamps = async (friendName, newStamps) => {
     const newFriends = {
@@ -272,6 +288,7 @@ function App() {
           onDeleteFriend={deleteFriend}
           onUpdateFriendsOrder={updateFriendsOrder}
           onOpenStampPage={openStampPage}
+          onOpenSettings={openSettings}
           onShowModal={showModal}
           onShowAlert={showAlert}
         />
@@ -285,6 +302,15 @@ function App() {
           onUpdateStamps={updateStamps}
           onEditFriend={editFriend}
           onShowModal={showModal}
+          onShowAlert={showAlert}
+        />
+      )}
+      
+      {currentScreen === 'settings' && (
+        <SettingsScreen
+          onBack={() => setCurrentScreen('home')}
+          onChangePassword={handleChangePassword}
+          onDeleteAccount={handleDeleteAccount}
           onShowAlert={showAlert}
         />
       )}
@@ -307,10 +333,6 @@ function App() {
         isError={alertConfig.isError}
         onClose={closeAlert}
       />
-      
-      <footer>
-        © 2025. Michelle.J.S. All rights reserved.
-      </footer>
     </div>
   );
 }
