@@ -10,13 +10,29 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
   useEffect(() => {
     if (draggedItem) {
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     }
     return () => {
-      document.body.style.overflow = 'auto';
+      // 컴포넌트 언마운트 시 스크롤 복구
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
   }, [draggedItem]);
+
+  // 컴포넌트 언마운트 시 스크롤 복구
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, []);
 
   const performDrop = (dragged, dropped) => {
     const { item: draggedItemData, type: draggedType } = dragged;
@@ -60,7 +76,7 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         }
     }
 
-    // Case 3: Dropping a file onto another file - swap their positions
+    // Case 3: Dropping a file onto another file - 정확한 위치에 삽입
     if (draggedType === 'item' && dropType === 'item') {
         let newOrder = [...friendsOrder];
         const draggedName = draggedItemData.name;
@@ -69,14 +85,21 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         const toIndex = newOrder.indexOf(targetName);
 
         if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
+            // 드래그된 아이템을 배열에서 제거
             newOrder.splice(fromIndex, 1);
-            let insertAt = toIndex;
+            
+            // 타겟 인덱스 재계산
+            let insertIndex = newOrder.indexOf(targetName);
             if (fromIndex < toIndex) {
-                insertAt = toIndex;
+                // 아래에서 위로 이동: 타겟 뒤에 삽입
+                insertIndex = insertIndex + 1;
             } else {
-                insertAt = toIndex;
+                // 위에서 아래로 이동: 타겟 앞에 삽입
+                insertIndex = insertIndex;
             }
-            newOrder.splice(insertAt, 0, draggedName);
+            
+            // 새 위치에 삽입
+            newOrder.splice(insertIndex, 0, draggedName);
             onUpdateOrder(newOrder);
         }
     }
@@ -124,20 +147,24 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
 
   const handleTouchMove = (e) => {
     if (!draggedItem || !draggedElementRef.current) return;
-    e.preventDefault();
-
+    
     const touch = e.touches[0];
     const deltaX = touch.clientX - touchStartPos.x;
     const deltaY = touch.clientY - touchStartPos.y;
-    draggedElementRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    
+    // 빠른 반응을 위해 임계값 줄임
+    if (Math.abs(deltaX) < 3 && Math.abs(deltaY) < 3) {
+      return;
+    }
 
-    if (draggedElementRef.current) {
-        draggedElementRef.current.style.visibility = 'hidden';
-    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    draggedElementRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    draggedElementRef.current.style.zIndex = '1000';
+    draggedElementRef.current.style.pointerEvents = 'none';
+
     const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (draggedElementRef.current) {
-        draggedElementRef.current.style.visibility = 'visible';
-    }
 
     if (targetElement) {
         const { item: draggedItemData, type: draggedType } = draggedItem;
@@ -168,28 +195,28 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
             }
         }
         
-        if (JSON.stringify(newDropTarget) !== JSON.stringify(dropTarget)) {
-             setDropTarget(newDropTarget);
-        }
+        setDropTarget(newDropTarget);
     }
   };
 
-  const handleTouchEnd = () => {
-    window.removeEventListener('touchmove', handleTouchMove);
-    window.removeEventListener('touchend', handleTouchEnd);
-
+  const handleTouchEnd = (e) => {
+    // 스크롤 복구
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    
     if (draggedElementRef.current) {
         draggedElementRef.current.style.transform = '';
+        draggedElementRef.current.style.zIndex = '';
+        draggedElementRef.current.style.pointerEvents = '';
+        draggedElementRef.current.classList.remove('dragging-source');
     }
 
     if (draggedItem && dropTarget) {
         performDrop(draggedItem, dropTarget);
     }
 
-    if (draggedElementRef.current) {
-        draggedElementRef.current.classList.remove('dragging-source');
-        draggedElementRef.current = null;
-    }
+    draggedElementRef.current = null;
     setDraggedItem(null);
     setDropTarget(null);
   };
@@ -198,15 +225,23 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     if (!isEditMode) {
       return;
     }
-    e.stopPropagation();
+    
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     setDraggedItem({ item, type });
-    draggedElementRef.current = e.currentTarget.parentElement;
-    e.currentTarget.parentElement.classList.add('dragging-source');
+    draggedElementRef.current = e.currentTarget.closest('[data-type]');
+    draggedElementRef.current.classList.add('dragging-source');
 
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd);
+    // 간단한 이벤트 리스너 등록
+    const touchMoveHandler = (e) => handleTouchMove(e);
+    const touchEndHandler = (e) => {
+      handleTouchEnd(e);
+      document.removeEventListener('touchmove', touchMoveHandler);
+      document.removeEventListener('touchend', touchEndHandler);
+    };
+
+    document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+    document.addEventListener('touchend', touchEndHandler);
   };
 
   const groupFriendsByColor = () => {
@@ -238,8 +273,22 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         data-index={index}
         data-type="item"
       >
-        {isEditMode && <div className="drag-handle item-drag-handle" onTouchStart={(e) => handleTouchStart(e, { name, index }, 'item')}>☰</div>}
-        <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="folder" />
+        {isEditMode && (
+          <div 
+            className="drag-handle item-drag-handle" 
+            onTouchStart={(e) => handleTouchStart(e, { name, index }, 'item')}
+            onClick={(e) => e.preventDefault()}
+          >
+            ☰
+          </div>
+        )}
+        <img 
+          src="https://cdn-icons-png.flaticon.com/512/716/716784.png" 
+          alt="folder" 
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          style={{ pointerEvents: isEditMode ? 'none' : 'auto' }}
+        />
         <span>{name}</span>
       </div>
     );
@@ -265,7 +314,15 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
                 data-index={index}
                 data-type="group"
               >
-                {isEditMode && <div className="drag-handle group-drag-handle" onTouchStart={(e) => handleTouchStart(e, color, 'group')}>☰</div>}
+                {isEditMode && (
+                  <div 
+                    className="drag-handle group-drag-handle" 
+                    onTouchStart={(e) => handleTouchStart(e, color, 'group')}
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    ☰
+                  </div>
+                )}
                 <div className={'folder-container'}>
                   {window.innerWidth > 600 ? (
                     <>

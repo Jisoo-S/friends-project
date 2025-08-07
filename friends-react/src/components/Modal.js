@@ -14,10 +14,14 @@ const Modal = ({
 }) => {
   const [inputValue, setInputValue] = useState(defaultValue);
   const [selectedColor, setSelectedColor] = useState(currentColor || 'yellow');
+  const [originalValue, setOriginalValue] = useState(defaultValue);
+  const [originalColor, setOriginalColor] = useState(currentColor || 'yellow');
 
   useEffect(() => {
     setInputValue(defaultValue);
     setSelectedColor(currentColor || 'yellow');
+    setOriginalValue(defaultValue);
+    setOriginalColor(currentColor || 'yellow');
   }, [defaultValue, currentColor]);
 
   // 모달이 열릴 때 스크롤 위치 저장 및 body 스크롤 방지
@@ -52,6 +56,13 @@ const Modal = ({
     onConfirm(null, true);
   };
 
+  const handleClose = () => {
+    // x버튼 클릭 시 원본 상태로 복구
+    setInputValue(originalValue);
+    setSelectedColor(originalColor);
+    onClose();
+  };
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -62,14 +73,14 @@ const Modal = ({
       }
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      onClose();
+      handleClose();
     }
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <span className="modal-close" onClick={onClose}>&times;</span>
+        <span className="modal-close" onClick={handleClose}>&times;</span>
         <h2>
           {title}
           {(title === "change date" || title === "date") && (

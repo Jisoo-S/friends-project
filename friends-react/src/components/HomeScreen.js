@@ -94,22 +94,221 @@ const HomeScreen = ({
     onShowAlert('변경사항이 저장되었습니다.', false);
   };
 
+  const moveColor = (fromIndex, direction) => {
+    const newColorOrder = [...colorOrder];
+    const toIndex = fromIndex + direction;
+    
+    if (toIndex >= 0 && toIndex < newColorOrder.length) {
+      // 요소 순서 바꾸기
+      [newColorOrder[fromIndex], newColorOrder[toIndex]] = [newColorOrder[toIndex], newColorOrder[fromIndex]];
+      onUpdateColorOrder(newColorOrder);
+    }
+  };
+
+  const moveFile = (fromIndex, direction) => {
+    const newFriendsOrder = [...friendsOrder];
+    const toIndex = fromIndex + direction;
+    
+    if (toIndex >= 0 && toIndex < newFriendsOrder.length) {
+      // 파일 순서 바꾸기
+      [newFriendsOrder[fromIndex], newFriendsOrder[toIndex]] = [newFriendsOrder[toIndex], newFriendsOrder[fromIndex]];
+      onUpdateFriendsOrder(newFriendsOrder);
+    }
+  };
+
+  const changeFileColor = (friendName, newColor) => {
+    onUpdateFriendColor(friendName, newColor);
+  };
+
+  const moveFileInGroup = (groupColor, indexInGroup, direction) => {
+    // 해당 색상 그룹의 파일들만 가져오기
+    const filesInGroup = friendsOrder.filter(name => {
+      const friendData = friends[name];
+      return (friendData?.color || 'yellow') === groupColor;
+    });
+    
+    const newGroupOrder = [...filesInGroup];
+    const toIndex = indexInGroup + direction;
+    
+    if (toIndex >= 0 && toIndex < newGroupOrder.length) {
+      // 그룹 내에서 순서 바꿀기
+      [newGroupOrder[indexInGroup], newGroupOrder[toIndex]] = [newGroupOrder[toIndex], newGroupOrder[indexInGroup]];
+      
+      // 전체 friendsOrder에 반영
+      const newFriendsOrder = [...friendsOrder];
+      const otherColorFiles = friendsOrder.filter(name => {
+        const friendData = friends[name];
+        return (friendData?.color || 'yellow') !== groupColor;
+      });
+      
+      // 다른 색상 파일들의 위치 파악
+      const otherFilesPositions = [];
+      otherColorFiles.forEach(fileName => {
+        otherFilesPositions.push({
+          name: fileName,
+          originalIndex: friendsOrder.indexOf(fileName)
+        });
+      });
+      
+      // 새로운 배열 생성
+      let newOrderResult = [];
+      let groupIndex = 0;
+      let otherIndex = 0;
+      
+      for (let i = 0; i < friendsOrder.length; i++) {
+        const originalFile = friendsOrder[i];
+        const friendData = friends[originalFile];
+        const fileColor = friendData?.color || 'yellow';
+        
+        if (fileColor === groupColor) {
+          if (groupIndex < newGroupOrder.length) {
+            newOrderResult.push(newGroupOrder[groupIndex]);
+            groupIndex++;
+          }
+        } else {
+          if (otherIndex < otherFilesPositions.length) {
+            newOrderResult.push(otherFilesPositions[otherIndex].name);
+            otherIndex++;
+          }
+        }
+      }
+      
+      onUpdateFriendsOrder(newOrderResult);
+    }
+  };
+
   return (
     <div id="home-screen" className="screen">
       <button className="logout-btn" onClick={handleLogout}>Logout</button>
       <button className="settings-btn" onClick={onOpenSettings}>⚙️</button>
       <h1>nice to meet you!</h1>
 
-      <FolderList
-        friends={friends}
-        friendsOrder={friendsOrder}
-        colorOrder={colorOrder}
-        onUpdateOrder={onUpdateFriendsOrder}
-        onUpdateColorOrder={onUpdateColorOrder}
-        onOpenStampPage={onOpenStampPage}
-        isEditMode={isEditMode}
-        onUpdateFriendColor={onUpdateFriendColor}
-      />
+      {isEditMode && (
+        <div className="simple-edit-controls">
+          {/* 목록 배치 순서 */}
+          <div className="edit-section">
+            <h3>목록 배치 순서</h3>
+            <div className="group-order-controls">
+              {colorOrder.map((color, index) => (
+                <div key={color} className="group-order-item">
+                  <div className={`color-circle color-${color}`}></div>
+                  <span className="group-name">
+                    {color === 'yellow' ? 'yellow file' : color === 'pink' ? 'pink file' : 'blue file'}
+                  </span>
+                  <span className="group-position">#{index + 1}</span>
+                  <div className="group-controls">
+                    <button 
+                      className="simple-btn up"
+                      onClick={() => moveColor(index, -1)}
+                      disabled={index === 0}
+                    >
+                      ↑
+                    </button>
+                    <button 
+                      className="simple-btn down"
+                      onClick={() => moveColor(index, 1)}
+                      disabled={index === colorOrder.length - 1}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 파일 순서 및 색상 변경 */}
+          <div className="edit-section">
+            <h3>파일 순서 및 색상 변경</h3>
+            <div className="files-by-color">
+              {colorOrder.map((color) => {
+                const filesInColor = friendsOrder.filter(name => {
+                  const friendData = friends[name];
+                  return (friendData?.color || 'yellow') === color;
+                });
+                
+                if (filesInColor.length === 0) return null;
+                
+                return (
+                  <div key={color} className="color-group-section">
+                    <div className={`color-group-header color-${color}`}>
+                      <div className={`file-icon-in-header color-${color}`}></div>
+                      <span className="group-title">
+                        {color === 'yellow' ? 'yellow file' : color === 'pink' ? 'pink file' : 'blue file'} ({filesInColor.length})
+                      </span>
+                    </div>
+                    <div className="color-group-files">
+                      {filesInColor.map((friendName, indexInColor) => {
+                        const globalIndex = friendsOrder.indexOf(friendName);
+                        const isFirstInGroup = indexInColor === 0;
+                        const isLastInGroup = indexInColor === filesInColor.length - 1;
+                        return (
+                          <div key={friendName} className="file-edit-item">
+                            <div className="file-display">
+                              <div className={`file-icon-real color-${color}`}></div>
+                              <span className="simple-file-name">{friendName}</span>
+                              <span className="file-position">#{indexInColor + 1}</span>
+                            </div>
+                            <div className="file-edit-controls-right">
+                              {/* 순서 변경 - 같은 색상 그룹 내에서만 */}
+                              <div className="position-controls">
+                                {!isFirstInGroup && (
+                                  <button 
+                                    className="simple-btn up"
+                                    onClick={() => moveFileInGroup(color, indexInColor, -1)}
+                                  >
+                                    ↑
+                                  </button>
+                                )}
+                                {!isLastInGroup && (
+                                  <button 
+                                    className="simple-btn down"
+                                    onClick={() => moveFileInGroup(color, indexInColor, 1)}
+                                  >
+                                    ↓
+                                  </button>
+                                )}
+                              </div>
+                              {/* 색상 변경 */}
+                              <div className="color-controls">
+                                <button 
+                                  className={`color-btn-real yellow ${color === 'yellow' ? 'selected' : ''}`}
+                                  onClick={() => changeFileColor(friendName, 'yellow')}
+                                ></button>
+                                <button 
+                                  className={`color-btn-real pink ${color === 'pink' ? 'selected' : ''}`}
+                                  onClick={() => changeFileColor(friendName, 'pink')}
+                                ></button>
+                                <button 
+                                  className={`color-btn-real blue ${color === 'blue' ? 'selected' : ''}`}
+                                  onClick={() => changeFileColor(friendName, 'blue')}
+                                ></button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!isEditMode && (
+        <FolderList
+          friends={friends}
+          friendsOrder={friendsOrder}
+          colorOrder={colorOrder}
+          onUpdateOrder={onUpdateFriendsOrder}
+          onUpdateColorOrder={onUpdateColorOrder}
+          onOpenStampPage={onOpenStampPage}
+          isEditMode={false}
+          onUpdateFriendColor={onUpdateFriendColor}
+        />
+      )}
 
       <div style={{ marginTop: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
         {!isEditMode && (

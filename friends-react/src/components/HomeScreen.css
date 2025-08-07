@@ -5,6 +5,320 @@
   position: relative;
 }
 
+/* 간단한 편집 컨트롤 */
+.simple-edit-controls {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  max-width: 600px;
+}
+
+.edit-section {
+  margin-bottom: 30px;
+}
+
+.edit-section:last-child {
+  margin-bottom: 0;
+}
+
+.edit-section h3 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+/* 목록 배치 순서 */
+.group-order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-order-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 목록 배치 순서 - 색상 원형 */
+.color-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #5e5e5e;
+}
+
+.color-circle.color-yellow {
+  background: #ffde21;
+}
+
+.color-circle.color-pink {
+  background: #ff2877;
+}
+
+.color-circle.color-blue {
+  background: #41a9f8;
+}
+
+/* 파일 아이콘들 */
+.file-icon-in-header {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: #f5f5dc;
+}
+
+.file-icon-in-header.color-yellow {
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+.file-icon-in-header.color-pink {
+  filter: hue-rotate(305deg) saturate(2.2) brightness(1.1) contrast(1.4) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+.file-icon-in-header.color-blue {
+  filter: hue-rotate(180deg) saturate(1.6) brightness(0.85) contrast(1.3) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+.file-icon-real {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  background: #f5f5dc;
+}
+
+.file-icon-real.color-yellow {
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+.file-icon-real.color-pink {
+  filter: hue-rotate(305deg) saturate(2.2) brightness(1.1) contrast(1.4) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+.file-icon-real.color-blue {
+  filter: hue-rotate(180deg) saturate(1.6) brightness(0.85) contrast(1.3) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  background: url('https://cdn-icons-png.flaticon.com/512/716/716784.png') no-repeat center center;
+  background-size: 80%;
+}
+
+/* 색상 변경 버튼 - 실제 파일 아이콘 */
+.color-btn-real {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #007AFF;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white !important;
+  background-color: white !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.color-btn-real::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  background-image: url('https://cdn-icons-png.flaticon.com/512/716/716784.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.color-btn-real.yellow::before {
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+}
+
+.color-btn-real.pink::before {
+  filter: hue-rotate(305deg) saturate(2.2) brightness(1.1) contrast(1.4) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+}
+
+.color-btn-real.blue::before {
+  filter: hue-rotate(180deg) saturate(1.6) brightness(0.85) contrast(1.3) drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+}
+
+.color-btn-real.selected {
+  border-color: #007AFF;
+  border-width: 3px;
+  box-shadow: 0 0 12px rgba(0, 122, 255, 0.6);
+  transform: scale(1.05);
+}
+
+.color-btn-real:not(.selected) {
+  border-color: #8fbef0;
+  opacity: 0.7;
+}
+
+/* 마지막 항목 비활성화 스타일 */
+.simple-btn.disabled-last {
+  background: #ccc !important;
+  color: #999 !important;
+  cursor: not-allowed !important;
+}
+
+.group-name {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.group-position {
+  font-size: 12px;
+  color: #666;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.group-controls {
+  display: flex;
+  gap: 5px;
+}
+
+/* 색상별 파일 그룹 */
+.files-by-color {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.color-group-section {
+  border: 2px solid #dee2e6;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.color-group-header {
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-group-header.color-yellow {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.color-group-header.color-pink {
+  background: rgba(255, 105, 180, 0.1);
+}
+
+.color-group-header.color-blue {
+  background: rgba(65, 105, 225, 0.1);
+}
+
+.group-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.color-group-files {
+  background: white;
+}
+
+.file-edit-item {
+  padding: 10px 15px;
+  border-bottom: 1px solid #f1f3f4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-edit-item:last-child {
+  border-bottom: none;
+}
+
+.file-edit-controls-right {
+  display: flex;
+  gap: 35px;
+  align-items: center;
+  margin-left: auto;
+  padding-left: 40px;
+}
+
+.position-controls {
+  display: flex;
+  gap: 5px;
+  min-width: 80px;
+  justify-content: flex-end;
+}
+
+.color-controls {
+  display: flex;
+  gap: 12px;
+  padding-left: 25px;
+}
+
+/* 공통 요소들 */
+.file-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+
+.simple-file-name {
+  font-size: 14px;
+  color: #333;
+}
+
+.file-position {
+  font-size: 12px;
+  color: #666;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.simple-btn {
+  background: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.simple-btn:hover:not(:disabled) {
+  background: #0056CC;
+}
+
+.simple-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+
+
 .logout-btn {
   position: absolute;
   top: 20px;
@@ -194,6 +508,82 @@
 @media (max-width: 600px) {
   #home-screen {
     padding: 20px;
+  }
+  
+  .simple-edit-controls {
+    max-width: 95%;
+    padding: 15px;
+  }
+  
+  .edit-section h3 {
+    font-size: 16px;
+  }
+  
+  .group-order-item {
+    padding: 10px;
+  }
+  
+  .group-indicator {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .color-circle {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .color-group-header {
+    padding: 10px 12px;
+  }
+  
+  .file-edit-item {
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .file-edit-controls-right {
+    justify-content: center;
+    gap: 25px;
+    margin-left: 0;
+    padding-left: 0;
+  }
+  
+  .position-controls {
+    min-width: 70px;
+  }
+  
+  .color-controls {
+    gap: 10px;
+    padding-left: 5px;
+  }
+  
+  .simple-file-name {
+    font-size: 13px;
+  }
+  
+  .simple-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+  
+  .color-btn-simple {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+  
+  .color-btn-real {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .color-btn-real::before {
+    width: 18px;
+    height: 18px;
   }
   
   #home-screen h1 {
