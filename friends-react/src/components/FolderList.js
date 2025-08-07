@@ -21,46 +21,9 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     }
   }, [draggedItem]);
 
-
-  const handleDragStart = (e, item, type) => {
-    if (!isEditMode) {
-      e.preventDefault();
-      return;
-    }
-    e.stopPropagation();
-    setDraggedItem({ item, type });
-    e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.classList.add('dragging-source');
-  };
-
-  const handleDragEnd = (e) => {
-    e.stopPropagation();
-    e.currentTarget.classList.remove('dragging-source');
-    setDraggedItem(null);
-    setDropTarget(null);
-  };
-
-  const handleDragOver = (e, item, type, index) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-
-    
-    if (draggedItem) {
-      if (type === 'group' || type === 'separator') {
-        setDropTarget({ item, type, index });
-      } else if (type === 'item') {
-        setDropTarget({ item, type, index });
-      }
-    }
-  };
-
-  const handleDrop = async (e, dropItem, dropType, dropIndex) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!draggedItem) return;
-
-    const { item: draggedItemData, type: draggedType } = draggedItem;
+  const performDrop = (dragged, dropped) => {
+    const { item: draggedItemData, type: draggedType } = dragged;
+    const { item: dropItem, type: dropType, index: dropIndex } = dropped;
 
     // Case 1: Dropping a file onto a group
     if (draggedType === 'item' && dropType === 'group') {
@@ -77,14 +40,9 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         const fromIndex = newOrder.indexOf(draggedColor);
         const toIndex = newOrder.indexOf(targetColor);
 
-        console.log(`Group Drag: "${draggedColor}" (index ${fromIndex}) to "${targetColor}" (index ${toIndex})`);
-
         if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-            // Simply swap the positions
             newOrder[fromIndex] = targetColor;
             newOrder[toIndex] = draggedColor;
-            
-            console.log('New color order:', newOrder);
             onUpdateColorOrder(newOrder);
         }
     }
@@ -113,30 +71,118 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         const fromIndex = newOrder.indexOf(draggedName);
         const toIndex = newOrder.indexOf(targetName);
 
-        console.log(`File Drag: "${draggedName}" (index ${fromIndex}) to "${targetName}" (index ${toIndex})`);
-
         if (fromIndex !== -1 && toIndex !== -1 && fromIndex !== toIndex) {
-            // Remove dragged item from original position
             newOrder.splice(fromIndex, 1);
-            
-            // Insert at the target position
-            // The target index needs adjustment if we're moving from left to right
             let insertAt = toIndex;
             if (fromIndex < toIndex) {
-                // Moving right: target has shifted left by 1
                 insertAt = toIndex;
             } else {
-                // Moving left: insert before target
                 insertAt = toIndex;
             }
-            
             newOrder.splice(insertAt, 0, draggedName);
-            
-            console.log('New friends order:', newOrder);
             onUpdateOrder(newOrder);
         }
     }
+  };
+
+  const handleDragStart = (e, item, type) => {
+    if (!isEditMode) {
+      e.preventDefault();
+      return;
+    }
+    e.stopPropagation();
+    setDraggedItem({ item, type });
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging-source');
+  };
+
+  const handleDragEnd = (e) => {
+    e.stopPropagation();
+    const sourceElement = document.querySelector('.dragging-source');
+    if (sourceElement) {
+        sourceElement.classList.remove('dragging-source');
+    }
+    setDraggedItem(null);
     setDropTarget(null);
+  };
+
+  const handleDragOver = (e, item, type, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (draggedItem) {
+      setDropTarget({ item, type, index });
+    }
+  };
+
+  const handleDrop = (e, dropItem, dropType, dropIndex) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!draggedItem) return;
+
+    performDrop(draggedItem, { item: dropItem, type: dropType, index: dropIndex });
+    
+    setDropTarget(null);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!draggedItem) return;
+
+    const touch = e.touches[0];
+    const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (targetElement) {
+        const folderElement = targetElement.closest('[data-type="item"]');
+        const groupElement = targetElement.closest('[data-type="group"]');
+        const separatorElement = targetElement.closest('[data-type="separator"]');
+
+        let newDropTarget = null;
+
+        if (folderElement) {
+            const name = folderElement.dataset.name;
+            const index = parseInt(folderElement.dataset.index, 10);
+            newDropTarget = { item: { name, index }, type: 'item', index };
+        } else if (groupElement) {
+            const color = groupElement.dataset.color;
+            const index = parseInt(groupElement.dataset.index, 10);
+            newDropTarget = { item: color, type: 'group', index };
+        } else if (separatorElement) {
+            const index = parseInt(separatorElement.dataset.index, 10);
+            newDropTarget = { item: null, type: 'separator', index };
+        }
+        
+        if (JSON.stringify(newDropTarget) !== JSON.stringify(dropTarget)) {
+             setDropTarget(newDropTarget);
+        }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    window.removeEventListener('touchmove', handleTouchMove);
+    window.removeEventListener('touchend', handleTouchEnd);
+
+    if (draggedItem && dropTarget) {
+        performDrop(draggedItem, dropTarget);
+    }
+
+    const sourceElement = document.querySelector('.dragging-source');
+    if (sourceElement) {
+        sourceElement.classList.remove('dragging-source');
+    }
+    setDraggedItem(null);
+    setDropTarget(null);
+  };
+
+  const handleTouchStart = (e, item, type) => {
+    if (!isEditMode) {
+      return;
+    }
+    e.stopPropagation();
+    setDraggedItem({ item, type });
+    e.currentTarget.classList.add('dragging-source');
+
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
   };
 
   const groupFriendsByColor = () => {
@@ -163,7 +209,11 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         onDragEnd={handleDragEnd}
         onDragOver={(e) => handleDragOver(e, { name, index }, 'item')}
         onDrop={(e) => handleDrop(e, { name, index }, 'item')}
+        onTouchStart={(e) => handleTouchStart(e, { name, index }, 'item')}
         onClick={() => !isEditMode && onOpenStampPage(name)}
+        data-name={name}
+        data-index={index}
+        data-type="item"
       >
         {isEditMode && <div className="drag-handle item-drag-handle">☰</div>}
         <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="folder" />
@@ -188,6 +238,10 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, color, 'group', index)}
                 onDrop={(e) => handleDrop(e, color, 'group', index)}
+                onTouchStart={(e) => handleTouchStart(e, color, 'group')}
+                data-color={color}
+                data-index={index}
+                data-type="group"
               >
                 {isEditMode && <div className="drag-handle group-drag-handle">☰</div>}
                 <div className={'folder-container'}>
@@ -211,6 +265,8 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
                     className={`drop-separator ${dropTarget?.type === 'separator' && dropTarget?.index === index + 1 ? 'drop-target' : ''}`}
                     onDragOver={(e) => handleDragOver(e, null, 'separator', index + 1)}
                     onDrop={(e) => handleDrop(e, null, 'separator', index + 1)}
+                    data-index={index + 1}
+                    data-type="separator"
                 />
               )}
             </React.Fragment>
