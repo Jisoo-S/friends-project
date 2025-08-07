@@ -135,13 +135,13 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     }
 
     if (targetElement) {
-        const { type: draggedType } = draggedItem;
+        const { item: draggedItemData, type: draggedType } = draggedItem;
         let newDropTarget = null;
 
         if (draggedType === 'group') {
             const groupElement = targetElement.closest('[data-type="group"]');
             const separatorElement = targetElement.closest('[data-type="separator"]');
-            if (groupElement) {
+            if (groupElement && groupElement.dataset.color !== draggedItemData) {
                 const color = groupElement.dataset.color;
                 const index = parseInt(groupElement.dataset.index, 10);
                 newDropTarget = { item: color, type: 'group', index };
@@ -152,7 +152,7 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         } else if (draggedType === 'item') {
             const folderElement = targetElement.closest('[data-type="item"]');
             const groupElement = targetElement.closest('[data-type="group"]');
-            if (folderElement) {
+            if (folderElement && folderElement.dataset.name !== draggedItemData.name) {
                 const name = folderElement.dataset.name;
                 const index = parseInt(folderElement.dataset.index, 10);
                 newDropTarget = { item: { name, index }, type: 'item', index };
