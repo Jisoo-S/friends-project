@@ -40,13 +40,19 @@ function App() {
     if (!currentUser) return;
     
     try {
+      // colorOrder가 undefined인 경우 현재 state 또는 기본값 사용
+      const finalColorOrder = dataToSave.colorOrder || colorOrder || ['yellow', 'pink', 'blue'];
+      
       const payload = {
         email: currentUser.email,
-        friends: dataToSave.friends,
-        friendsOrder: dataToSave.friendsOrder,
-        colorOrder: dataToSave.colorOrder,
+        friends: dataToSave.friends || friends,
+        friendsOrder: dataToSave.friendsOrder || friendsOrder,
+        colorOrder: finalColorOrder,
         lastUpdated: new Date().toISOString()
       };
+      
+      console.log('저장할 데이터:', payload); // 디버깅용
+      
       await saveUserData(currentUser.uid, payload);
       console.log('데이터 저장 완료');
     } catch (error) {
@@ -188,7 +194,7 @@ function App() {
     setFriends(newFriends);
     setFriendsOrder(newOrder);
     
-    await saveData({ friends: newFriends, friendsOrder: newOrder });
+    await saveData({ friends: newFriends, friendsOrder: newOrder, colorOrder: colorOrder });
     showAlert('성공적으로 추가되었습니다.', false);
   };
 
@@ -202,7 +208,7 @@ function App() {
     setFriends(newFriends);
     setFriendsOrder(newOrder);
     
-    await saveData({ friends: newFriends, friendsOrder: newOrder });
+    await saveData({ friends: newFriends, friendsOrder: newOrder, colorOrder: colorOrder });
     showAlert('성공적으로 삭제되었습니다.', false);
   };
 
@@ -265,7 +271,7 @@ function App() {
     };
     
     setFriends(newFriends);
-    await saveData({ friends: newFriends, friendsOrder: friendsOrder });
+    await saveData({ friends: newFriends, friendsOrder: friendsOrder, colorOrder: colorOrder });
   };
 
   // 친구 정보 수정
@@ -292,7 +298,7 @@ function App() {
     }
     
     setFriends(newFriends);
-    await saveData({ friends: newFriends, friendsOrder: newOrder });
+    await saveData({ friends: newFriends, friendsOrder: newOrder, colorOrder: colorOrder });
     showAlert('정보가 성공적으로 변경되었습니다.', false);
   };
 
