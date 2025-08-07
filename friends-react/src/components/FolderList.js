@@ -135,23 +135,32 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     }
 
     if (targetElement) {
-        const folderElement = targetElement.closest('[data-type="item"]');
-        const groupElement = targetElement.closest('[data-type="group"]');
-        const separatorElement = targetElement.closest('[data-type="separator"]');
-
+        const { type: draggedType } = draggedItem;
         let newDropTarget = null;
 
-        if (folderElement) {
-            const name = folderElement.dataset.name;
-            const index = parseInt(folderElement.dataset.index, 10);
-            newDropTarget = { item: { name, index }, type: 'item', index };
-        } else if (groupElement) {
-            const color = groupElement.dataset.color;
-            const index = parseInt(groupElement.dataset.index, 10);
-            newDropTarget = { item: color, type: 'group', index };
-        } else if (separatorElement) {
-            const index = parseInt(separatorElement.dataset.index, 10);
-            newDropTarget = { item: null, type: 'separator', index };
+        if (draggedType === 'group') {
+            const groupElement = targetElement.closest('[data-type="group"]');
+            const separatorElement = targetElement.closest('[data-type="separator"]');
+            if (groupElement) {
+                const color = groupElement.dataset.color;
+                const index = parseInt(groupElement.dataset.index, 10);
+                newDropTarget = { item: color, type: 'group', index };
+            } else if (separatorElement) {
+                const index = parseInt(separatorElement.dataset.index, 10);
+                newDropTarget = { item: null, type: 'separator', index };
+            }
+        } else if (draggedType === 'item') {
+            const folderElement = targetElement.closest('[data-type="item"]');
+            const groupElement = targetElement.closest('[data-type="group"]');
+            if (folderElement) {
+                const name = folderElement.dataset.name;
+                const index = parseInt(folderElement.dataset.index, 10);
+                newDropTarget = { item: { name, index }, type: 'item', index };
+            } else if (groupElement) {
+                const color = groupElement.dataset.color;
+                const index = parseInt(groupElement.dataset.index, 10);
+                newDropTarget = { item: color, type: 'group', index };
+            }
         }
         
         if (JSON.stringify(newDropTarget) !== JSON.stringify(dropTarget)) {
