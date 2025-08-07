@@ -4,6 +4,7 @@ import './FolderList.css';
 const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdateColorOrder, onOpenStampPage, isEditMode, onUpdateFriendColor }) => {
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
+  const [touchStartPos, setTouchStartPos] = useState({ x: 0, y: 0 });
   const draggedElementRef = useRef(null);
 
   useEffect(() => {
@@ -122,10 +123,14 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
   };
 
   const handleTouchMove = (e) => {
-    if (!draggedItem) return;
+    if (!draggedItem || !draggedElementRef.current) return;
     e.preventDefault();
 
     const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartPos.x;
+    const deltaY = touch.clientY - touchStartPos.y;
+    draggedElementRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
     if (draggedElementRef.current) {
         draggedElementRef.current.style.visibility = 'hidden';
     }
@@ -173,6 +178,10 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     window.removeEventListener('touchmove', handleTouchMove);
     window.removeEventListener('touchend', handleTouchEnd);
 
+    if (draggedElementRef.current) {
+        draggedElementRef.current.style.transform = '';
+    }
+
     if (draggedItem && dropTarget) {
         performDrop(draggedItem, dropTarget);
     }
@@ -190,6 +199,8 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
       return;
     }
     e.stopPropagation();
+    const touch = e.touches[0];
+    setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     setDraggedItem({ item, type });
     draggedElementRef.current = e.currentTarget;
     e.currentTarget.classList.add('dragging-source');
