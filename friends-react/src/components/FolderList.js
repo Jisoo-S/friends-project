@@ -202,8 +202,8 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     const touch = e.touches[0];
     setTouchStartPos({ x: touch.clientX, y: touch.clientY });
     setDraggedItem({ item, type });
-    draggedElementRef.current = e.currentTarget;
-    e.currentTarget.classList.add('dragging-source');
+    draggedElementRef.current = e.currentTarget.parentElement;
+    e.currentTarget.parentElement.classList.add('dragging-source');
 
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('touchend', handleTouchEnd);
@@ -233,13 +233,12 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         onDragEnd={handleDragEnd}
         onDragOver={(e) => handleDragOver(e, { name, index }, 'item')}
         onDrop={(e) => handleDrop(e, { name, index }, 'item')}
-        onTouchStart={(e) => handleTouchStart(e, { name, index }, 'item')}
         onClick={() => !isEditMode && onOpenStampPage(name)}
         data-name={name}
         data-index={index}
         data-type="item"
       >
-        {isEditMode && <div className="drag-handle item-drag-handle">☰</div>}
+        {isEditMode && <div className="drag-handle item-drag-handle" onTouchStart={(e) => handleTouchStart(e, { name, index }, 'item')}>☰</div>}
         <img src="https://cdn-icons-png.flaticon.com/512/716/716784.png" alt="folder" />
         <span>{name}</span>
       </div>
@@ -262,12 +261,11 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
                 onDragEnd={handleDragEnd}
                 onDragOver={(e) => handleDragOver(e, color, 'group', index)}
                 onDrop={(e) => handleDrop(e, color, 'group', index)}
-                onTouchStart={(e) => handleTouchStart(e, color, 'group')}
                 data-color={color}
                 data-index={index}
                 data-type="group"
               >
-                {isEditMode && <div className="drag-handle group-drag-handle">☰</div>}
+                {isEditMode && <div className="drag-handle group-drag-handle" onTouchStart={(e) => handleTouchStart(e, color, 'group')}>☰</div>}
                 <div className={'folder-container'}>
                   {window.innerWidth > 600 ? (
                     <>
