@@ -42,6 +42,97 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+.edit-btn {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  background: white;
+  border: 3px solid #FFD700;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  z-index: 100;
+}
+
+.edit-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.edit-mode-buttons {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  z-index: 101;
+  animation: slideUp 0.3s ease-out;
+}
+
+.cancel-btn {
+  font-size: 18px;
+  background: #ff6b6b;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+}
+
+.cancel-btn:hover {
+  background: #ff5252;
+  transform: scale(1.05);
+}
+
+.cancel-btn:active {
+  transform: scale(0.98);
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+}
+
+.save-btn {
+  background: white;
+  color: #e75480;
+  font-size: 24px;
+  font-family: 'Spicy Rice', 'Gowun Dodum', cursive, sans-serif;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 3px 3px 10px #bbb;
+  min-width: 140px;
+  transition: all 0.2s;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.save-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 4px 4px 15px #aaa;
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+  box-shadow: 1px 1px 4px #bbb;
+}
+
 .home-footer {
   margin-top: 100px;
   padding: 20px;
@@ -81,6 +172,25 @@
   color: #2271b1;
 }
 
+.action-buttons-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 80px;
+}
+
+.action-buttons-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#edit-toggle-btn {
+  font-size: 24px;
+  min-width: 60px;
+  padding: 10px;
+}
+
 @media (max-width: 600px) {
   #home-screen {
     padding: 20px;
@@ -104,6 +214,30 @@
     font-size: 20px;
     bottom: 15px;
     left: 15px;
+  }
+
+  .edit-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    bottom: 70px;
+    left: 15px;
+  }
+
+  .edit-mode-buttons {
+    bottom: 25px;
+    gap: 12px;
+  }
+
+  .cancel-btn {
+    font-size: 18px;
+    padding: 10px 20px;
+  }
+
+  .save-btn {
+    font-size: 18px;
+    padding: 10px 25px;
+    min-width: 100px;
   }
 
   .home-footer {

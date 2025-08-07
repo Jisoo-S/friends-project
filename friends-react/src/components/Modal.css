@@ -38,10 +38,25 @@
 
 .modal-close {
   position: absolute;
-  right: 20px;
-  top: 10px;
-  font-size: 24px;
+  right: 15px;
+  top: 5px;
+  font-size: 40px;
   cursor: pointer;
+  font-weight: normal;
+  line-height: 1;
+  color: #666;
+  transition: color 0.3s ease;
+  font-family: Arial, sans-serif;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #333;
+  transform: scale(1.1);
 }
 
 .color-picker {

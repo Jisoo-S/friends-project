@@ -20,6 +20,28 @@ const Modal = ({
     setSelectedColor(currentColor || 'yellow');
   }, [defaultValue, currentColor]);
 
+  // 모달이 열릴 때 스크롤 위치 저장 및 body 스크롤 방지
+  useEffect(() => {
+    if (isOpen) {
+      // 현재 스크롤 위치 저장
+      const scrollY = window.scrollY;
+      
+      // body 스크롤 방지
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      return () => {
+        // 모달이 닫힐 때 원래 스크롤 위치로 복원
+        const scrollY = document.body.style.top;
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleOK = () => {
@@ -66,7 +88,7 @@ const Modal = ({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
           placeholder={isDateModal ? "yyyy-mm-dd" : "name"}
-          autoFocus
+          autoFocus={false}
         />
         
         {showColorPicker && (

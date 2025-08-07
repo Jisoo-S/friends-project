@@ -12,6 +12,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [friends, setFriends] = useState({});
   const [friendsOrder, setFriendsOrder] = useState([]);
+  const [colorOrder, setColorOrder] = useState(['yellow', 'pink', 'blue']);
   const [currentScreen, setCurrentScreen] = useState('login');
   const [currentFriend, setCurrentFriend] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +44,7 @@ function App() {
         email: currentUser.email,
         friends: dataToSave.friends,
         friendsOrder: dataToSave.friendsOrder,
+        colorOrder: dataToSave.colorOrder,
         lastUpdated: new Date().toISOString()
       };
       await saveUserData(currentUser.uid, payload);
@@ -61,6 +63,7 @@ function App() {
       if (userData) {
         const loadedFriends = userData.friends || {};
         const loadedOrder = userData.friendsOrder || [];
+        const loadedColorOrder = userData.colorOrder || ['yellow', 'pink', 'blue'];
         
         // 데이터 구조 변환
         const convertedFriends = {};
@@ -82,12 +85,14 @@ function App() {
         
         setFriends(convertedFriends);
         setFriendsOrder(loadedOrder.length > 0 ? loadedOrder : Object.keys(convertedFriends));
+        setColorOrder(loadedColorOrder);
       } else {
         // 새 사용자
         await saveUserData(user.uid, {
           email: user.email,
           friends: {},
           friendsOrder: [],
+          colorOrder: ['yellow', 'pink', 'blue'],
           createdAt: new Date().toISOString()
         });
       }
@@ -165,7 +170,7 @@ function App() {
     setAlertConfig({
       isOpen: false,
       message: '',
-      isError: false
+            isError: false
     });
   };
 
@@ -201,10 +206,31 @@ function App() {
     showAlert('성공적으로 삭제되었습니다.', false);
   };
 
+  
+
   // 친구 순서 업데이트
   const updateFriendsOrder = async (newOrder) => {
     setFriendsOrder(newOrder);
-    await saveData({ friends: friends, friendsOrder: newOrder });
+    await saveData({ friends: friends, friendsOrder: newOrder, colorOrder: colorOrder });
+  };
+
+
+  const updateColorOrder = async (newOrder) => {
+    console.log('updateColorOrder 호출됨:', newOrder);
+    setColorOrder(newOrder);
+    await saveData({ friends, friendsOrder, colorOrder: newOrder });
+  };
+
+  const updateFriendColor = async (friendName, newColor) => {
+    const newFriends = {
+      ...friends,
+      [friendName]: {
+        ...friends[friendName],
+        color: newColor
+      }
+    };
+    setFriends(newFriends);
+    await saveData({ friends: newFriends, friendsOrder, colorOrder });
   };
 
   // 스탬프 페이지 열기
@@ -284,13 +310,16 @@ function App() {
         <HomeScreen 
           friends={friends}
           friendsOrder={friendsOrder}
+          colorOrder={colorOrder}
           onAddFriend={addFriend}
           onDeleteFriend={deleteFriend}
           onUpdateFriendsOrder={updateFriendsOrder}
+          onUpdateColorOrder={updateColorOrder}
           onOpenStampPage={openStampPage}
           onOpenSettings={openSettings}
           onShowModal={showModal}
           onShowAlert={showAlert}
+          onUpdateFriendColor={updateFriendColor}
         />
       )}
       
