@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './FolderList.css';
 
 const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdateColorOrder, onOpenStampPage, isEditMode, onUpdateFriendColor }) => {
   const [draggedItem, setDraggedItem] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
+  const draggedElementRef = useRef(null);
 
   useEffect(() => {
     if (draggedItem) {
-      const preventScroll = (e) => {
-        e.preventDefault();
-      };
-
-      window.addEventListener('touchmove', preventScroll, { passive: false });
-      window.addEventListener('wheel', preventScroll, { passive: false });
-
-      return () => {
-        window.removeEventListener('touchmove', preventScroll);
-        window.removeEventListener('wheel', preventScroll);
-      };
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
     }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [draggedItem]);
 
   const performDrop = (dragged, dropped) => {
@@ -127,9 +123,16 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
 
   const handleTouchMove = (e) => {
     if (!draggedItem) return;
+    e.preventDefault();
 
     const touch = e.touches[0];
+    if (draggedElementRef.current) {
+        draggedElementRef.current.style.visibility = 'hidden';
+    }
     const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (draggedElementRef.current) {
+        draggedElementRef.current.style.visibility = 'visible';
+    }
 
     if (targetElement) {
         const folderElement = targetElement.closest('[data-type="item"]');
@@ -165,9 +168,9 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
         performDrop(draggedItem, dropTarget);
     }
 
-    const sourceElement = document.querySelector('.dragging-source');
-    if (sourceElement) {
-        sourceElement.classList.remove('dragging-source');
+    if (draggedElementRef.current) {
+        draggedElementRef.current.classList.remove('dragging-source');
+        draggedElementRef.current = null;
     }
     setDraggedItem(null);
     setDropTarget(null);
@@ -179,6 +182,7 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
     }
     e.stopPropagation();
     setDraggedItem({ item, type });
+    draggedElementRef.current = e.currentTarget;
     e.currentTarget.classList.add('dragging-source');
 
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
