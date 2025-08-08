@@ -105,17 +105,6 @@ const HomeScreen = ({
     }
   };
 
-  const moveFile = (fromIndex, direction) => {
-    const newFriendsOrder = [...friendsOrder];
-    const toIndex = fromIndex + direction;
-    
-    if (toIndex >= 0 && toIndex < newFriendsOrder.length) {
-      // 파일 순서 바꾸기
-      [newFriendsOrder[fromIndex], newFriendsOrder[toIndex]] = [newFriendsOrder[toIndex], newFriendsOrder[fromIndex]];
-      onUpdateFriendsOrder(newFriendsOrder);
-    }
-  };
-
   const changeFileColor = (friendName, newColor) => {
     onUpdateFriendColor(friendName, newColor);
   };
@@ -135,7 +124,6 @@ const HomeScreen = ({
       [newGroupOrder[indexInGroup], newGroupOrder[toIndex]] = [newGroupOrder[toIndex], newGroupOrder[indexInGroup]];
       
       // 전체 friendsOrder에 반영
-      const newFriendsOrder = [...friendsOrder];
       const otherColorFiles = friendsOrder.filter(name => {
         const friendData = friends[name];
         return (friendData?.color || 'yellow') !== groupColor;
@@ -239,7 +227,6 @@ const HomeScreen = ({
                     </div>
                     <div className="color-group-files">
                       {filesInColor.map((friendName, indexInColor) => {
-                        const globalIndex = friendsOrder.indexOf(friendName);
                         const isFirstInGroup = indexInColor === 0;
                         const isLastInGroup = indexInColor === filesInColor.length - 1;
                         return (

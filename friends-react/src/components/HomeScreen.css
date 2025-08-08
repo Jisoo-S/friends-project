@@ -540,29 +540,37 @@
   
   .file-edit-item {
     padding: 8px 12px;
-    flex-direction: column;
+    flex-direction: row;
     gap: 12px;
-    align-items: stretch;
+    align-items: center;
+    justify-content: space-between;
   }
   
   .file-edit-controls-right {
-    justify-content: center;
+    justify-content: flex-end;
     gap: 25px;
-    margin-left: 0;
-    padding-left: 0;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 5px;
+    flex-shrink: 0;
   }
   
   .position-controls {
-    min-width: 70px;
+    min-width: 75px;
+    justify-content: flex-end;
   }
   
   .color-controls {
-    gap: 10px;
-    padding-left: 5px;
+    gap: 12px;
+    padding-left: 15px;
   }
   
   .simple-file-name {
     font-size: 13px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .simple-btn {

@@ -93,10 +93,8 @@ const FolderList = ({ friends, friendsOrder, colorOrder, onUpdateOrder, onUpdate
             if (fromIndex < toIndex) {
                 // 아래에서 위로 이동: 타겟 뒤에 삽입
                 insertIndex = insertIndex + 1;
-            } else {
-                // 위에서 아래로 이동: 타겟 앞에 삽입
-                insertIndex = insertIndex;
             }
+            // 위에서 아래로 이동: 타겟 앞에 삽입은 insertIndex 그대로 사용
             
             // 새 위치에 삽입
             newOrder.splice(insertIndex, 0, draggedName);
