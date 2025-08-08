@@ -176,7 +176,7 @@ const HomeScreen = ({
           {/* 안내 문구 */}
           <div className="edit-guide">
             <span className="guide-text">
-              <span className="arrow-icon">⬆⬇</span> 화살표 버튼을 통해 목록과 파일 순서를 변경하세요!
+              <span className="arrow-icon">⬆⬇</span> 화살표 버튼을 통해 목록과 파일 순서를<br className="mobile-break" /> 변경하세요!
             </span>
           </div>
           

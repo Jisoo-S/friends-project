@@ -31,6 +31,10 @@
   color: #1976d2;
 }
 
+.mobile-break {
+  display: none;
+}
+
 /* 간단한 편집 컨트롤 */
 .simple-edit-controls {
   background: white;
@@ -553,6 +557,10 @@
   
   .arrow-icon {
     font-size: 16px;
+  }
+  
+  .mobile-break {
+    display: block;
   }
   
   .simple-edit-controls {
