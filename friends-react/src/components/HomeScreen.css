@@ -308,6 +308,7 @@
   justify-content: center;
 }
 
+
 .simple-btn:hover:not(:disabled) {
   background: #0056CC;
 }
