@@ -173,6 +173,13 @@ const HomeScreen = ({
 
       {isEditMode && (
         <div className="simple-edit-controls">
+          {/* 안내 문구 */}
+          <div className="edit-guide">
+            <span className="guide-text">
+              <span className="arrow-icon">⬆⬇</span> 화살표 버튼을 통해 목록과 파일 순서를 변경하세요!
+            </span>
+          </div>
+          
           {/* 목록 배치 순서 */}
           <div className="edit-section">
             <h3>목록 배치 순서</h3>
@@ -190,14 +197,14 @@ const HomeScreen = ({
                       onClick={() => moveColor(index, -1)}
                       disabled={index === 0}
                     >
-                      ↑
+                      ⬆
                     </button>
                     <button 
                       className="simple-btn down"
                       onClick={() => moveColor(index, 1)}
                       disabled={index === colorOrder.length - 1}
                     >
-                      ↓
+                      ⬇
                     </button>
                   </div>
                 </div>
@@ -244,7 +251,7 @@ const HomeScreen = ({
                                     className="simple-btn up"
                                     onClick={() => moveFileInGroup(color, indexInColor, -1)}
                                   >
-                                    ↑
+                                    ⬆
                                   </button>
                                 )}
                                 {!isLastInGroup && (
@@ -252,7 +259,7 @@ const HomeScreen = ({
                                     className="simple-btn down"
                                     onClick={() => moveFileInGroup(color, indexInColor, 1)}
                                   >
-                                    ↓
+                                    ⬇
                                   </button>
                                 )}
                               </div>
